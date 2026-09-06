@@ -1,6 +1,7 @@
 export default {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
+  injectGlobals: true,
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
@@ -10,6 +11,9 @@ export default {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: {
+          isolatedModules: true,
+        },
       },
     ],
   },
