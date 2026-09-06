@@ -144,7 +144,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
 
   // Controlled Demo Simulator Effect
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
+    let interval: any;
     if (isSimulating && tracking) {
       interval = setInterval(async () => {
         try {
