@@ -121,7 +121,12 @@ export const translations: Record<Language, Record<string, string>> = {
     // Reliability & Payments
     reviewOrder: "Review Order",
     raiseDispute: "Raise Dispute",
-    reliabilityScore: "Reliability Score"
+    reliabilityScore: "Reliability Score",
+
+    // Demo Simulation
+    simStarted: "Simulation Started",
+    simEnRoute: "Vehicle en route",
+    simDelivered: "Delivered"
   },
   hi: {
     appName: "नोवाकृषि",
@@ -243,7 +248,12 @@ export const translations: Record<Language, Record<string, string>> = {
     // Reliability & Payments
     reviewOrder: "ऑर्डर की समीक्षा करें",
     raiseDispute: "विवाद दर्ज करें",
-    reliabilityScore: "विश्वसनीयता स्कोर"
+    reliabilityScore: "विश्वसनीयता स्कोर",
+
+    // Demo Simulation
+    simStarted: "सिमुलेशन शुरू हुआ",
+    simEnRoute: "वाहन रास्ते में है",
+    simDelivered: "पहुंचा दिया गया"
   },
   mr: {
     appName: "कृषी शील्ड AI",
@@ -345,6 +355,11 @@ export const translations: Record<Language, Record<string, string>> = {
     // Reliability & Payments
     reviewOrder: "ऑर्डरचे पुनरावलोकन करा",
     raiseDispute: "तक्रार नोंदवा",
-    reliabilityScore: "विश्वसनीयता स्कोअर"
+    reliabilityScore: "विश्वसनीयता स्कोअर",
+
+    // Demo Simulation
+    simStarted: "सिम्युलेशन सुरू झाले",
+    simEnRoute: "वाहन मार्गावर आहे",
+    simDelivered: "वितरित केले"
   }
 };
