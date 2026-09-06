@@ -18,6 +18,7 @@ export interface UpdateLocationPayload {
   speedKmH?: number;
   address?: string;
   status?: DeliveryStatus;
+  distanceRemainingKm?: number;
   isDemoSimulator?: boolean;
 }
 
@@ -107,7 +108,7 @@ export const deliveryService = {
       estimatedArrival: doc.estimatedArrival
         ? new Date(doc.estimatedArrival).toISOString()
         : new Date(Date.now() + 3.5 * 3600 * 1000).toISOString(),
-      distanceRemainingKm: doc.distanceRemainingKm || 142,
+      distanceRemainingKm: doc.distanceRemainingKm !== undefined && doc.distanceRemainingKm !== null ? doc.distanceRemainingKm : 142,
       isDemoSimulator: !!doc.isDemoSimulator,
       orderStatusTimeline: timelineSteps,
       createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString()
@@ -116,18 +117,24 @@ export const deliveryService = {
 
   // 1. Create or Assign Delivery Dispatch
   async createDelivery(payload: CreateDeliveryPayload): Promise<DeliveryResponseDTO> {
-    if (!mongoose.Types.ObjectId.isValid(payload.orderId)) {
-      throw new Error('Invalid order ID');
+    let orderIdStr = payload.orderId;
+    let order: any = null;
+
+    if (mongoose.Types.ObjectId.isValid(orderIdStr)) {
+      order = await Order.findById(orderIdStr);
+    } else {
+      order = await Order.findOne({ orderNumber: orderIdStr });
     }
 
-    let delivery = await Delivery.findOne({ orderId: new mongoose.Types.ObjectId(payload.orderId) });
+    // If order doesn't exist, we still create a Delivery record so demo tracking works
+    const realOrderId = order ? order._id : new mongoose.Types.ObjectId();
+    const orderNum = order ? order.orderNumber : orderIdStr;
+
+    let delivery = await Delivery.findOne(
+      order ? { orderId: realOrderId } : { orderNumber: orderNum }
+    );
     if (delivery) {
       return this.toDeliveryDTO(delivery);
-    }
-
-    const order = await Order.findById(payload.orderId);
-    if (!order) {
-      throw new Error('Order not found');
     }
 
     const pickupLat = 26.7606; // Gorakhpur FPO Coordinates
@@ -136,8 +143,8 @@ export const deliveryService = {
     const destLng = 80.9462;
 
     delivery = new Delivery({
-      orderId: order._id,
-      orderNumber: order.orderNumber,
+      orderId: realOrderId,
+      orderNumber: orderNum,
       deliveryPartnerId: payload.deliveryPartnerId
         ? new mongoose.Types.ObjectId(payload.deliveryPartnerId)
         : new mongoose.Types.ObjectId(),
@@ -147,18 +154,18 @@ export const deliveryService = {
         vehicleNumber: payload.vehicleNumber || 'UP53BT9821'
       },
       pickupLocation: {
-        address: `${order.sellerDistrict} FPO Producer Hub`,
-        district: order.sellerDistrict,
-        state: order.sellerState,
+        address: order ? `${order.sellerDistrict} FPO Producer Hub` : 'Gorakhpur FPO Producer Hub',
+        district: order ? order.sellerDistrict : 'Gorakhpur',
+        state: order ? order.sellerState : 'Uttar Pradesh',
         lat: pickupLat,
         lng: pickupLng
       },
       destination: {
-        address: `${order.deliveryAddress.streetAddress}, ${order.deliveryAddress.city}`,
-        district: order.deliveryAddress.city,
-        state: order.deliveryAddress.state,
+        address: order ? `${order.deliveryAddress.streetAddress}, ${order.deliveryAddress.city}` : 'Gomti Nagar Destination Hub',
+        district: order ? order.deliveryAddress.city : 'Lucknow',
+        state: order ? order.deliveryAddress.state : 'Uttar Pradesh',
         lat: destLat,
-        lng: destLng
+        lng: destLat
       },
       currentLocation: {
         address: 'En-route on NH-27 (Ayodhya Expressway)',
@@ -180,18 +187,26 @@ export const deliveryService = {
 
   // 2. Get Live Order GPS Tracking
   async getOrderTracking(orderId: string): Promise<DeliveryResponseDTO> {
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      throw new Error('Invalid order ID');
+    let order: any = null;
+
+    if (mongoose.Types.ObjectId.isValid(orderId)) {
+      order = await Order.findById(orderId);
+    } else {
+      order = await Order.findOne({ orderNumber: orderId });
     }
 
-    let delivery = await Delivery.findOne({ orderId: new mongoose.Types.ObjectId(orderId) });
+    const realOrderId = order ? order._id : null;
+    
+    let delivery = await Delivery.findOne(
+      realOrderId ? { orderId: realOrderId } : { orderNumber: orderId }
+    );
+
     if (!delivery) {
-      // Auto-create delivery dispatch for order
-      return await this.createDelivery({ orderId });
+      // Auto-create delivery dispatch for order (even if it's a dummy order)
+      return await this.createDelivery({ orderId: orderId });
     }
 
-    const order = await Order.findById(orderId);
-    return this.toDeliveryDTO(delivery, order?.orderStatus || 'IN_TRANSIT');
+    return this.toDeliveryDTO(delivery, order?.orderStatus || delivery.status);
   },
 
   // 3. Get Delivery Dispatch By ID
@@ -209,6 +224,8 @@ export const deliveryService = {
       query = { _id: new mongoose.Types.ObjectId(payload.deliveryId) };
     } else if (payload.orderId && mongoose.Types.ObjectId.isValid(payload.orderId)) {
       query = { orderId: new mongoose.Types.ObjectId(payload.orderId) };
+    } else if (payload.orderId) {
+      query = { orderNumber: payload.orderId };
     } else {
       throw new Error('deliveryId or orderId required');
     }
@@ -223,6 +240,10 @@ export const deliveryService = {
     if (payload.speedKmH !== undefined) doc.currentLocation.speedKmH = payload.speedKmH;
     if (payload.address) doc.currentLocation.address = payload.address;
     doc.currentLocation.lastUpdated = new Date();
+
+    if (payload.distanceRemainingKm !== undefined) {
+      doc.distanceRemainingKm = payload.distanceRemainingKm;
+    }
 
     if (payload.status) {
       doc.status = payload.status;

@@ -40,6 +40,8 @@ app.get('/api/health', (_req, res) => {
 
 // GET /api/orders/:orderId/tracking alias
 app.get('/api/orders/:orderId/tracking', deliveryController.getOrderTracking);
+app.post('/api/orders/:orderId/tracking/start', deliveryController.startSimulation);
+app.post('/api/orders/:orderId/tracking/stop', deliveryController.stopSimulation);
 
 // API Routes
 app.use('/api/auth', authRouter);

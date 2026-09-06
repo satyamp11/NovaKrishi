@@ -703,6 +703,28 @@ export const apiService = {
     }
   },
 
+  async startDemoSimulation(orderId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/tracking/start`, {
+        method: 'POST'
+      });
+      return await response.json();
+    } catch (err) {
+      return { success: false, message: 'Failed to start demo simulation.' };
+    }
+  },
+
+  async stopDemoSimulation(orderId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/tracking/stop`, {
+        method: 'POST'
+      });
+      return await response.json();
+    } catch (err) {
+      return { success: false, message: 'Failed to stop demo simulation.' };
+    }
+  },
+
   async updateDeliveryLocation(payload: {
     orderId?: string;
     deliveryId?: string;

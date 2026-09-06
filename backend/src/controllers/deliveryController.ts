@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { deliveryService } from '../services/deliveryService.js';
 import { AuthenticatedRequest } from '../middleware/authMiddleware.js';
+import { gpsSimulationService } from '../services/gpsSimulationService.js';
 
 export const deliveryController = {
   // POST /api/delivery
@@ -65,6 +66,28 @@ export const deliveryController = {
       });
     } catch (error: any) {
       return res.status(500).json({ success: false, message: error.message || 'Unable to update location.' });
+    }
+  },
+
+  // POST /api/orders/:orderId/tracking/start
+  async startSimulation(req: Request, res: Response) {
+    try {
+      const orderId = req.params.orderId as string;
+      const result = await gpsSimulationService.startSimulation(orderId);
+      return res.status(200).json(result);
+    } catch (error: any) {
+      return res.status(500).json({ success: false, message: error.message || 'Failed to start simulation.' });
+    }
+  },
+
+  // POST /api/orders/:orderId/tracking/stop
+  async stopSimulation(req: Request, res: Response) {
+    try {
+      const orderId = req.params.orderId as string;
+      const result = gpsSimulationService.stopSimulation(orderId);
+      return res.status(200).json(result);
+    } catch (error: any) {
+      return res.status(500).json({ success: false, message: error.message || 'Failed to stop simulation.' });
     }
   }
 };

@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Truck,
   MapPin,
   Clock,
-  ShieldCheck,
   CheckCircle2,
   Package,
   Play,
   Pause,
-  RotateCcw,
   ArrowLeft,
   Navigation,
   Sparkles,
@@ -25,7 +23,7 @@ import {
   ErrorState,
   useToast,
 } from '../components/ui';
-import { apiService, DeliveryTrackingData, DeliveryStatus } from '../services/apiService';
+import { apiService, DeliveryTrackingData } from '../services/apiService';
 import { ReliabilityBadge } from '../components/ui/ReliabilityBadge';
 import { EscrowStatusTimeline } from '../components/checkout/EscrowStatusTimeline';
 import { useAuth } from '../context/AuthContext';
@@ -52,7 +50,24 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
 
   // Controlled Demo Simulator State
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [simStep, setSimStep] = useState<number>(0);
+  
+  // Advanced Telemetry State
+  const [maxDistance, setMaxDistance] = useState<number>(0);
+  const [speedHistory, setSpeedHistory] = useState<number[]>([]);
+  const [vehiclePos, setVehiclePos] = useState({ x: 50, y: 50 }); // base coordinates for 1000x100 viewBox
+  const pathRef = useRef<SVGPathElement>(null);
+
+  // Compute percentage safely
+  const routePercent = maxDistance > 0 
+    ? Math.max(0, Math.min(100, Math.round(((maxDistance - (tracking?.distanceRemainingKm || 0)) / maxDistance) * 100))) 
+    : 0;
+
+  // Waypoints configuration (percentages along the route)
+  const waypoints = [
+    { label: 'Basti Expressway', percent: 22 },
+    { label: 'Ayodhya Hub', percent: 47 },
+    { label: 'Barabanki Toll', percent: 72 }
+  ];
 
   const fetchTracking = async () => {
     setLoading(true);
@@ -94,54 +109,83 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
     if (orderId) {
       fetchTracking();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
+
+  useEffect(() => {
+    if (tracking) {
+      setMaxDistance(prev => {
+        // If simulation freshly restarts (status PICKED_UP), reset the max distance to the new starting distance
+        if (tracking.status === 'PICKED_UP' && tracking.distanceRemainingKm > 0) {
+          return tracking.distanceRemainingKm;
+        }
+        return Math.max(prev, tracking.distanceRemainingKm || 0);
+      });
+
+      if (tracking.currentLocation?.speedKmH !== undefined) {
+        setSpeedHistory(prev => {
+          const newHist = [...prev, tracking.currentLocation.speedKmH];
+          return newHist.slice(-15); // keep last 15 ticks for sparkline
+        });
+      }
+    }
+  }, [tracking]);
+
+  // Update vehicle position along the SVG path
+  useEffect(() => {
+    if (pathRef.current && tracking) {
+      const pathEl = pathRef.current as any;
+      const length = pathEl.getTotalLength ? pathEl.getTotalLength() : 1000;
+      const progress = Math.max(0, Math.min(1, routePercent / 100));
+      const point = pathEl.getPointAtLength ? pathEl.getPointAtLength(progress * length) : { x: 50, y: 50 };
+      setVehiclePos({ x: point.x, y: point.y });
+    }
+  }, [routePercent, tracking, maxDistance]);
 
   // Controlled Demo Simulator Effect
   useEffect(() => {
     let interval: any;
     if (isSimulating && tracking) {
       interval = setInterval(async () => {
-        setSimStep((prev) => {
-          const nextStep = (prev + 1) % 6;
-          
-          // Simulated highway route coordinates from Gorakhpur to Lucknow
-          const routePoints = [
-            { lat: 26.7606, lng: 83.3732, address: 'Gorakhpur FPO Producer Hub', speed: 0, dist: 270, status: 'PICKED_UP' },
-            { lat: 26.7800, lng: 82.8000, address: 'En-route NH-27 near Basti Expressway', speed: 56, dist: 210, status: 'IN_TRANSIT' },
-            { lat: 26.7900, lng: 82.2000, address: 'En-route NH-27 near Ayodhya Hub', speed: 64, dist: 142, status: 'IN_TRANSIT' },
-            { lat: 26.8100, lng: 81.5000, address: 'Approaching Barabanki Logistics Toll', speed: 48, dist: 75, status: 'IN_TRANSIT' },
-            { lat: 26.8400, lng: 81.0000, address: 'Lucknow Outer Ring Road Exit', speed: 35, dist: 18, status: 'OUT_FOR_DELIVERY' },
-            { lat: 26.8467, lng: 80.9462, address: 'Gomti Nagar Destination Hub', speed: 0, dist: 0, status: 'DELIVERED' },
-          ];
-
-          const currentP = routePoints[nextStep];
-
-          // Push live location update to backend API
-          apiService.updateDeliveryLocation({
-            orderId: tracking.orderId,
-            lat: currentP.lat,
-            lng: currentP.lng,
-            speedKmH: currentP.speed,
-            address: currentP.address,
-            status: currentP.status as DeliveryStatus,
-          }).then((res) => {
-            if (res.success && res.delivery) {
-              setTracking(res.delivery);
+        try {
+          const res = await apiService.getOrderTracking(orderId);
+          if (res.success && res.tracking) {
+            setTracking(res.tracking);
+            
+            if (res.tracking.status === 'DELIVERED') {
+              setIsSimulating(false);
+              toast.success('Simulated Delivery Completed!', 'Produce shipment reached destination.');
             }
-          });
-
-          if (currentP.status === 'DELIVERED') {
-            setIsSimulating(false);
-            toast.success('Simulated Delivery Completed!', 'Produce shipment reached destination.');
           }
-
-          return nextStep;
-        });
-      }, 3500);
+        } catch (err) {
+          console.error("Polling failed", err);
+        }
+      }, 2500); // Poll every 2.5 seconds
     }
 
-    return () => clearInterval(interval);
-  }, [isSimulating, tracking]);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+      // Cleanup: stop simulation on unmount if it was running
+      if (isSimulating) {
+        // Use navigator.sendBeacon or fire-and-forget fetch to stop on unmount reliably
+        apiService.stopDemoSimulation(orderId).catch(() => {});
+      }
+    };
+  }, [isSimulating, tracking, orderId, toast]);
+
+  const handleToggleSimulation = async () => {
+    if (!isSimulating) {
+      toast.info('Demo GPS Simulation Started', 'Animating vehicle route on map.');
+      await apiService.startDemoSimulation(orderId);
+      setIsSimulating(true);
+    } else {
+      toast.info('Demo GPS Simulation Paused', 'Vehicle telemetry stopped.');
+      await apiService.stopDemoSimulation(orderId);
+      setIsSimulating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
@@ -174,7 +218,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
                 <Badge variant="warning" size="sm" icon={<Sparkles className="w-3 h-3 text-amber-400" />}>
                   DEMO GPS SIMULATOR
                 </Badge>
-                <span className="text-[10px] text-amber-200 block font-mono mt-0.5">Simulated vehicle telemetry</span>
+                <span className="text-[10px] text-amber-200 block font-mono mt-0.5">Demo Route: Gorakhpur → Lucknow</span>
               </div>
 
               <Button
@@ -182,10 +226,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
                 size="xs"
                 className="bg-amber-600 hover:bg-amber-500 text-white"
                 leftIcon={isSimulating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                onClick={() => {
-                  setIsSimulating(!isSimulating);
-                  if (!isSimulating) toast.info('Demo GPS Simulation Started', 'Animating vehicle route on map.');
-                }}
+                onClick={handleToggleSimulation}
               >
                 {isSimulating ? 'Pause Sim' : 'Run Demo GPS'}
               </Button>
@@ -198,8 +239,14 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
         {loading && <LoadingState message="Connecting to GPS telemetry feed..." />}
 
-        {error && !loading && <ErrorState title="Tracking Data Error" message={error} onRetry={fetchTracking} />}
-
+        {error && (
+          <ErrorState 
+            title="Tracking Data Error" 
+            message={error} 
+            onRetry={fetchTracking} 
+          />
+        )}
+        
         {!loading && !error && tracking && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Column: Visual GPS Map & Telemetry Details */}
@@ -212,8 +259,21 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
                   <div className="flex items-center gap-2">
                     <Navigation className="w-4 h-4 text-emerald-400 animate-spin" />
                     <span className="font-bold text-white">Live Route Telemetry</span>
-                    <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono">
+                    <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
                       Speed: {tracking.currentLocation.speedKmH} km/h
+                      {/* Speed Sparkline */}
+                      {speedHistory.length > 1 && (
+                        <svg className="w-12 h-3 ml-1 overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                          <polyline 
+                            points={speedHistory.map((s, i) => `${(i / (speedHistory.length - 1)) * 100},${100 - (s / 100) * 100}`).join(' ')} 
+                            fill="none" 
+                            stroke="#10b981" 
+                            strokeWidth="4" 
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
                     </span>
                   </div>
 
@@ -229,15 +289,113 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
                   {/* Subtle Grid Map Pattern Overlay */}
                   <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30" />
 
-                  {/* Highway Route Path Line */}
-                  <div className="absolute top-1/2 left-6 sm:left-12 right-6 sm:right-12 h-1.5 bg-slate-800 rounded-full hidden sm:block">
-                    <div
-                      className="h-full bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-400 rounded-full transition-all duration-1000 shadow-[0_0_12px_#10b981]"
-                      style={{
-                        width: `${Math.max(10, Math.min(100, ((270 - tracking.distanceRemainingKm) / 270) * 100))}%`,
-                      }}
-                    />
-                  </div>
+                  {/* Fallback state when simulation hasn't started */}
+                  {(tracking.status === 'ASSIGNED' || tracking.pickupLocation.address.includes('Pending')) ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-slate-400">
+                      <Package className="w-12 h-12 mb-3 text-slate-600 opacity-50" />
+                      <p className="font-semibold text-sm">Awaiting vehicle dispatch...</p>
+                      <p className="text-xs mt-1 opacity-70">Tracking will commence once the route begins.</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* SVG Curved Route Path */}
+                      <div className="absolute top-1/2 left-6 sm:left-12 right-6 sm:right-12 h-24 -translate-y-1/2 z-10 hidden sm:block">
+                        <svg className="w-full h-full overflow-visible" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                          {/* Background muted path */}
+                          <path 
+                            d="M 20 50 C 300 -20, 700 120, 980 50" 
+                            fill="none" 
+                            stroke="#1e293b" 
+                            strokeWidth="12" 
+                            strokeLinecap="round" 
+                          />
+                          {/* Foreground active progress path */}
+                          <path 
+                            ref={pathRef}
+                            d="M 20 50 C 300 -20, 700 120, 980 50" 
+                            fill="none" 
+                            stroke="url(#routeGradient)" 
+                            strokeWidth="12" 
+                            strokeLinecap="round" 
+                            strokeDasharray="1000"
+                            strokeDashoffset={1000 - (routePercent / 100) * 1000}
+                            className="transition-all duration-[2500ms] ease-linear"
+                          />
+                          <defs>
+                            <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#10b981" />
+                              <stop offset="50%" stopColor="#f59e0b" />
+                              <stop offset="100%" stopColor="#10b981" />
+                            </linearGradient>
+                          </defs>
+
+                          {/* Intermediate Waypoints */}
+                          {waypoints.map((wp, i) => {
+                            const isPassed = routePercent >= wp.percent;
+                            // Calculate position for waypoint circle
+                            // We use a rough heuristic X coordinate (percent * 10) since exact pointAtLength isn't reactive inside map
+                            // But actually we can just estimate its position on the bezier curve or render simple markers
+                            // For simplicity, we can render the waypoints overlaid as HTML elements instead, but SVG circles are fine if we map linearly.
+                            // However, since it's a Bezier curve, linear X mapping isn't perfectly accurate.
+                            // A better approach: render waypoints as part of the visual path by approximating their S-curve Y.
+                            const x = 20 + (wp.percent / 100) * 960;
+                            // Y approximation for the cubic bezier: 
+                            // This is a rough visual approximation that looks good enough on the curve
+                            const t = wp.percent / 100;
+                            const y = Math.pow(1-t, 3)*50 + 3*Math.pow(1-t, 2)*t*(-20) + 3*(1-t)*Math.pow(t, 2)*120 + Math.pow(t, 3)*50;
+                            
+                            return (
+                              <g key={i} className="transition-all duration-700">
+                                <circle 
+                                  cx={x} 
+                                  cy={y} 
+                                  r="8" 
+                                  fill={isPassed ? "#10b981" : "#1e293b"} 
+                                  stroke={isPassed ? "#fff" : "#475569"} 
+                                  strokeWidth="3" 
+                                />
+                                <text 
+                                  x={x} 
+                                  y={y + 25} 
+                                  textAnchor="middle" 
+                                  fill={isPassed ? "#94a3b8" : "#475569"} 
+                                  fontSize="12" 
+                                  fontWeight="bold"
+                                >
+                                  {wp.label}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+
+                        {/* Active Vehicle Marker mapped exactly to SVG point */}
+                        <div 
+                          className="absolute z-30 transition-all duration-[2500ms] ease-linear"
+                          style={{
+                            left: `${(vehiclePos.x / 1000) * 100}%`,
+                            top: `${(vehiclePos.y / 100) * 100}%`,
+                            transform: 'translate(-50%, -50%)'
+                          }}
+                        >
+                          {/* Tooltip Label */}
+                          <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-slate-300 px-2.5 py-1 rounded-md text-[10px] font-mono whitespace-nowrap shadow-xl">
+                            {tracking.deliveryPartner.vehicleNumber} <span className="text-emerald-400">({tracking.currentLocation.speedKmH} km/h)</span>
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700" />
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900 mt-[-1px]" />
+                          </div>
+
+                          {/* Primary Truck Icon */}
+                          <div className="relative flex items-center justify-center w-10 h-10 bg-white rounded-full border-4 border-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.8)] z-10 transition-transform hover:scale-110">
+                            <Truck className="w-5 h-5 text-emerald-600" />
+                            {tracking.status !== 'DELIVERED' && tracking.status !== 'PICKED_UP' && (
+                              <div className="absolute inset-0 border-2 border-emerald-400 rounded-full animate-ping opacity-75" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   {/* Origin Node (Gorakhpur FPO Hub) */}
                   <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
@@ -263,14 +421,18 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Active Vehicle Marker Position on Map */}
-                  <div className="relative z-20 my-auto text-center py-4 sm:py-0">
-                    <div className="inline-flex flex-col items-center animate-bounce">
-                      <div className="bg-emerald-500 text-slate-950 px-3 py-1.5 rounded-xl font-black text-xs shadow-2xl flex items-center gap-1.5 border border-emerald-300">
-                        <Truck className="w-4 h-4 text-slate-950 shrink-0" />
-                        <span className="truncate">{tracking.deliveryPartner.vehicleNumber} ({tracking.currentLocation.speedKmH} km/h)</span>
+                  {/* Active Vehicle Marker (Mobile Only) */}
+                  <div className="sm:hidden relative z-20 my-auto text-center py-4">
+                    <div className="inline-flex flex-col items-center relative">
+                      <div className="bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1 rounded-md text-xs font-mono whitespace-nowrap mb-2 shadow-lg">
+                        {tracking.deliveryPartner.vehicleNumber} <span className="text-emerald-400">({tracking.currentLocation.speedKmH} km/h)</span>
                       </div>
-                      <div className="w-2 h-2 bg-emerald-400 rotate-45 -mt-1 shadow-xs" />
+                      <div className="relative flex items-center justify-center w-12 h-12 bg-white rounded-full border-4 border-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.8)]">
+                        <Truck className="w-6 h-6 text-emerald-600" />
+                        {tracking.status !== 'DELIVERED' && tracking.status !== 'PICKED_UP' && (
+                          <div className="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-75" />
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -285,7 +447,9 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
 
                     <div className="text-left sm:text-right shrink-0">
                       <span className="text-[10px] font-bold text-slate-400 uppercase block">Distance Remaining</span>
-                      <span className="text-sm font-black text-emerald-400">{tracking.distanceRemainingKm} km</span>
+                      <span className="text-sm font-black text-emerald-400">
+                        {tracking.distanceRemainingKm} km <span className="text-emerald-500/80 text-xs font-semibold ml-1">({routePercent}% Complete)</span>
+                      </span>
                     </div>
                   </div>
                 </div>
