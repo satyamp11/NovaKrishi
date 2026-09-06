@@ -111,19 +111,17 @@ export const translations: Record<Language, Record<string, string>> = {
     navAlerts: "Alerts",
     navProfile: "Profile",
 
-<<<<<<< Updated upstream
     // Voice Search
     voiceListening: "Listening...",
     voiceTapToSearch: "Tap mic to search by voice",
     voiceNotSupported: "Voice search not supported on this browser",
     voiceDidntCatch: "Didn't catch that, try again",
-    voiceAriaLabel: "Search by voice"
-=======
+    voiceAriaLabel: "Search by voice",
+
     // Reliability & Payments
     reviewOrder: "Review Order",
     raiseDispute: "Raise Dispute",
     reliabilityScore: "Reliability Score"
->>>>>>> Stashed changes
   },
   hi: {
     appName: "नोवाकृषि",
@@ -235,19 +233,17 @@ export const translations: Record<Language, Record<string, string>> = {
     navAlerts: "अलर्ट",
     navProfile: "प्रोफ़ाइल",
 
-<<<<<<< Updated upstream
     // Voice Search
     voiceListening: "सुन रहे हैं...",
     voiceTapToSearch: "आवाज़ से खोजने के लिए माइक दबाएं",
     voiceNotSupported: "आपके ब्राउज़र में वॉइस सर्च काम नहीं करता",
     voiceDidntCatch: "कुछ समझ नहीं आया, फिर से बोलें",
-    voiceAriaLabel: "आवाज़ से खोजें"
-=======
+    voiceAriaLabel: "आवाज़ से खोजें",
+
     // Reliability & Payments
     reviewOrder: "ऑर्डर की समीक्षा करें",
     raiseDispute: "विवाद दर्ज करें",
     reliabilityScore: "विश्वसनीयता स्कोर"
->>>>>>> Stashed changes
   },
   mr: {
     appName: "कृषी शील्ड AI",
@@ -339,18 +335,16 @@ export const translations: Record<Language, Record<string, string>> = {
     navAlerts: "अलर्ट",
     navProfile: "प्रोफाइल",
 
-<<<<<<< Updated upstream
     // Voice Search
     voiceListening: "ऐकत आहे...",
     voiceTapToSearch: "आवाजाने शोधण्यासाठी माइक दाबा",
     voiceNotSupported: "तुमच्या ब्राउझरवर व्हॉइस शोध समर्थित नाही",
     voiceDidntCatch: "काही समजले नाही, पुन्हा सांगा",
-    voiceAriaLabel: "आवाजाने शोधा"
-=======
+    voiceAriaLabel: "आवाजाने शोधा",
+
     // Reliability & Payments
     reviewOrder: "ऑर्डरचे पुनरावलोकन करा",
     raiseDispute: "तक्रार नोंदवा",
     reliabilityScore: "विश्वसनीयता स्कोअर"
->>>>>>> Stashed changes
   }
 };
