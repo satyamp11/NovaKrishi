@@ -118,3 +118,49 @@ export interface MarketRate {
   image?: string;
 }
 
+// --- Buyer Reliability & Payments ---
+
+export interface ReliabilityMetrics {
+  score: number;
+  totalOrders: number;
+  completedOrders: number;
+  disputesRaisedAgainst: number;
+  disputesResolved: number;
+  avgPaymentDelayDays: number;
+  badge: 'trusted' | 'good' | 'new' | 'flagged';
+}
+
+export interface Review {
+  _id: string;
+  orderId: string;
+  reviewerId: string;
+  revieweeId: string;
+  reviewerRole: 'farmer' | 'consumer' | 'bulk_buyer';
+  rating: number;
+  comment?: string;
+  tags: string[];
+  createdAt: string;
+}
+
+export type DisputeType = 'payment_delay' | 'non_payment' | 'quality_issue' | 'no_show' | 'other';
+export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'rejected';
+
+export interface Dispute {
+  _id: string;
+  orderId: string;
+  raisedBy: string;
+  raisedAgainst: string;
+  type: DisputeType;
+  description: string;
+  status: DisputeStatus;
+  resolution?: string;
+  evidenceUrls: string[];
+  statusHistory: {
+    status: DisputeStatus;
+    updatedAt: string;
+    note?: string;
+  }[];
+  createdAt: string;
+  resolvedAt?: string;
+}
+

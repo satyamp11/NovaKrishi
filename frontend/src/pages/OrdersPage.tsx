@@ -29,6 +29,10 @@ import { CheckoutSummaryCard, EscrowStatus } from '../components/checkout/Checko
 import { useRazorpayCheckout } from '../hooks/useRazorpayCheckout';
 import { apiService, OrderItem, OrderStatus, ExtendedPaymentState } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
+import { ReliabilityBadge } from '../components/ui/ReliabilityBadge';
+import { ReviewModal } from '../components/ReviewModal';
+import { DisputeForm } from '../components/DisputeForm';
+import { DisputeType } from '../types';
 
 export interface OrdersPageProps {
   onNavigateTab?: (tab: string) => void;
@@ -53,6 +57,12 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigateTab = () => {}
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Reliability & Disputes State
+  const [counterparty, setCounterparty] = useState<any | null>(null);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
   const { initiatePayment, isProcessing } = useRazorpayCheckout({
     onSuccess: () => {
@@ -98,6 +108,23 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigateTab = () => {}
       setLoading(false);
     }
   }, [token]);
+
+  useEffect(() => {
+    const fetchCounterparty = async () => {
+      if (!selectedOrderId || !user) return;
+      const order = orders.find(o => o.id === selectedOrderId);
+      if (!order) return;
+      
+      const counterpartyId = user.id === order.buyer.id ? order.seller.id : order.buyer.id;
+      const res = await apiService.getUserProfile(counterpartyId);
+      if (res.success && res.user) {
+        setCounterparty(res.user);
+      } else {
+        setCounterparty(null);
+      }
+    };
+    fetchCounterparty();
+  }, [selectedOrderId, orders, user]);
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     if (!token) return;
@@ -152,6 +179,54 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigateTab = () => {}
       toast.error('Error', 'Network error cancelling order.');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleReviewSubmit = async (rating: number, comment: string, tags: string[]) => {
+    if (!token || !selectedOrderId || !counterparty) return;
+    setIsSubmittingFeedback(true);
+    try {
+      const res = await apiService.createReview({
+        orderId: selectedOrderId,
+        revieweeId: counterparty.id || counterparty._id,
+        rating,
+        comment,
+        tags
+      });
+      if (res.success) {
+        toast.success('Review Submitted', 'Thank you for your feedback!');
+        setIsReviewOpen(false);
+      } else {
+        toast.error('Error', res.message || 'Failed to submit review');
+      }
+    } catch (err) {
+      toast.error('Error', 'Network error submitting review.');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
+  const handleDisputeSubmit = async (type: DisputeType, description: string, evidenceUrls: string[]) => {
+    if (!token || !selectedOrderId || !counterparty) return;
+    setIsSubmittingFeedback(true);
+    try {
+      const res = await apiService.createDispute({
+        orderId: selectedOrderId,
+        raisedAgainst: counterparty.id || counterparty._id,
+        type,
+        description,
+        evidenceUrls
+      });
+      if (res.success) {
+        toast.success('Dispute Raised', 'Admin has been notified and escrow is locked.');
+        setIsDisputeOpen(false);
+      } else {
+        toast.error('Error', res.message || 'Failed to raise dispute');
+      }
+    } catch (err) {
+      toast.error('Error', 'Network error raising dispute.');
+    } finally {
+      setIsSubmittingFeedback(false);
     }
   };
 
@@ -386,6 +461,20 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigateTab = () => {}
                           Cancel Order
                         </Button>
                       )}
+
+                      {/* Review and Dispute Buttons */}
+                      {!isCancelled && (
+                        <div className="flex gap-2 border-l border-slate-200 pl-2 ml-1">
+                          {ord.orderStatus === 'DELIVERED' && (
+                            <Button variant="outline" size="xs" onClick={() => setIsReviewOpen(true)}>
+                              Leave Review
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="xs" className="text-red-600 hover:bg-red-50" onClick={() => setIsDisputeOpen(true)}>
+                            Raise Dispute
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -469,12 +558,22 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigateTab = () => {}
                       <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
                         <div>
                           <span className="text-[10px] font-extrabold uppercase text-slate-400 block">Buyer Details</span>
-                          <p className="font-bold text-slate-900">{ord.buyer.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="font-bold text-slate-900">{ord.buyer.name}</p>
+                            {!isBuyer && counterparty && counterparty.id === ord.buyer.id && (
+                              <ReliabilityBadge metrics={counterparty.reliability} />
+                            )}
+                          </div>
                           <p className="text-slate-500 truncate">{ord.buyer.emailOrPhone}</p>
                         </div>
                         <div>
                           <span className="text-[10px] font-extrabold uppercase text-slate-400 block">Farmer / FPO</span>
-                          <p className="font-bold text-slate-900">{ord.seller.fpoName || ord.seller.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="font-bold text-slate-900">{ord.seller.fpoName || ord.seller.name}</p>
+                            {isBuyer && counterparty && counterparty.id === ord.seller.id && (
+                              <ReliabilityBadge metrics={counterparty.reliability} />
+                            )}
+                          </div>
                           <p className="text-slate-500">{ord.seller.district}, {ord.seller.state}</p>
                         </div>
                       </div>
@@ -508,6 +607,20 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigateTab = () => {}
           </div>
         )}
       </main>
+
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        onSubmit={handleReviewSubmit}
+        isSubmitting={isSubmittingFeedback}
+      />
+
+      <DisputeForm
+        isOpen={isDisputeOpen}
+        onClose={() => setIsDisputeOpen(false)}
+        onSubmit={handleDisputeSubmit}
+        isSubmitting={isSubmittingFeedback}
+      />
 
       <Footer onNavigate={onNavigateTab} />
     </div>

@@ -33,6 +33,28 @@ export const userController = {
     }
   },
 
+  async getUserProfile(req: AuthenticatedRequest, res: Response) {
+    try {
+      const user = await userService.getUserById(req.params.id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User profile not found.'
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        user
+      });
+    } catch (error) {
+      console.error('Error fetching specific user profile:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'An error occurred.'
+      });
+    }
+  },
+
   async updateProfile(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) {

@@ -1387,5 +1387,93 @@ export const apiService = {
         rates: updatedRates
       };
     }
+  },
+
+  // --- Reviews ---
+
+
+  async getUserProfile(id: string): Promise<{ success: boolean; user?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/profile/${id}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message };
+      return { success: true, user: data.user };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async createReview(payload: { orderId: string, revieweeId: string, rating: number, comment?: string, tags?: string[] }): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reviews`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to submit review' };
+      return { success: true, data };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getUserReviews(userId: string): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reviews/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to fetch reviews' };
+      return { success: true, data };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  // --- Disputes ---
+  async createDispute(payload: { orderId: string, raisedAgainst: string, type: string, description: string, evidenceUrls?: string[] }): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/disputes`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to file dispute' };
+      return { success: true, data };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getDisputes(): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/disputes`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to fetch disputes' };
+      return { success: true, data };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async updateDisputeStatus(id: string, payload: { status: string, resolution?: string, note?: string }): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/disputes/${id}/status`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to update dispute status' };
+      return { success: true, data };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
   }
 };

@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Search,
+  Scale,
 } from 'lucide-react';
 import {
   StatCard,
@@ -51,17 +52,20 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [disputes, setDisputes] = useState<any[]>([]);
 
   const fetchAdminData = async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const [mRes, fRes] = await Promise.all([
+      const [mRes, fRes, dRes] = await Promise.all([
         apiService.getAdminMetrics(token),
         apiService.getAdminFarmers(token),
+        activeSection === 'disputes' ? apiService.getDisputes() : Promise.resolve({ success: false, data: [] }),
       ]);
       if (mRes.success && mRes.metrics) setMetrics(mRes.metrics);
       if (fRes.success && fRes.farmers) setFarmers(fRes.farmers);
+      if (activeSection === 'disputes' && dRes) setDisputes(dRes as any[]);
     } catch (e) {
       console.error('Error fetching admin data:', e);
     } finally {
@@ -71,7 +75,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
 
   useEffect(() => {
     fetchAdminData();
-  }, [token]);
+  }, [token, activeSection]);
 
   const handleVerifyFarmer = async (farmerId: string, status: VerificationStatus) => {
     if (!token) return;
@@ -97,6 +101,21 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       f.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (f.farmInfo?.fpoName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleResolveDispute = async (disputeId: string, status: 'resolved' | 'rejected') => {
+    setUpdatingId(disputeId);
+    try {
+      const res = await apiService.updateDisputeStatus(disputeId, status, `Admin ${status} the dispute`);
+      if (res) {
+        toast.success(`Dispute ${status}`, `The dispute has been ${status}.`);
+        fetchAdminData();
+      }
+    } catch (error) {
+      toast.error('Action Failed', 'Could not update dispute status.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
@@ -221,6 +240,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           { id: 'mandi', label: '7. Market Prices', icon: TrendingUp },
           { id: 'ai-insights', label: '8. AI Insights', icon: Cpu },
           { id: 'reports', label: '9. Reports', icon: FileText },
+          { id: 'disputes', label: '10. Disputes', icon: Scale },
         ].map((sec) => {
           const isActive = activeSection === sec.id;
           const Icon = sec.icon;
@@ -360,8 +380,57 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
         </div>
       )}
 
+      {/* SECTION 10: DISPUTES WORKFLOW */}
+      {activeSection === 'disputes' && (
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                <Scale className="w-5 h-5 text-amber-500" />
+                10. Escrow & Order Disputes Resolution
+              </h3>
+              <p className="text-xs text-slate-500">Manage reported issues from buyers or farmers and determine payout resolutions.</p>
+            </div>
+          </div>
+          
+          {loading && <LoadingState message="Fetching open disputes..." />}
+          {!loading && disputes.length === 0 && <EmptyState icon={<CheckCircle2 className="w-10 h-10 text-emerald-400" />} title="No Open Disputes" message="All transactions are running smoothly." />}
+          {!loading && disputes.length > 0 && (
+            <div className="space-y-4">
+              {disputes.map((dispute) => (
+                <div key={dispute._id} className="p-4 border border-slate-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900 uppercase">{dispute.type.replace('_', ' ')}</span>
+                      <Badge variant={dispute.status === 'open' ? 'warning' : dispute.status === 'resolved' ? 'success' : 'slate'} size="sm">
+                        {dispute.status.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-700 mt-1">{dispute.description}</p>
+                    <div className="text-[10px] text-slate-500 mt-2 flex items-center gap-3">
+                      <span>Ref Order: <span className="font-mono">{dispute.orderId}</span></span>
+                      <span>Filed on: {new Date(dispute.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  {dispute.status === 'open' && (
+                    <div className="flex gap-2 shrink-0">
+                      <Button size="xs" variant="primary" onClick={() => handleResolveDispute(dispute._id, 'resolved')} isLoading={updatingId === dispute._id}>
+                        Resolve & Refund
+                      </Button>
+                      <Button size="xs" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleResolveDispute(dispute._id, 'rejected')} isLoading={updatingId === dispute._id}>
+                        Reject Claim
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Fallback for other sections */}
-      {activeSection !== 'farmers' && activeSection !== 'reports' && (
+      {activeSection !== 'farmers' && activeSection !== 'reports' && activeSection !== 'disputes' && (
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-3">
           <h3 className="text-lg font-black text-slate-900 capitalize">
             {activeSection.replace('-', ' ')} Admin Governance

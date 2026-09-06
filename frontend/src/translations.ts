@@ -116,7 +116,12 @@ export const translations: Record<Language, Record<string, string>> = {
     voiceTapToSearch: "Tap mic to search by voice",
     voiceNotSupported: "Voice search not supported on this browser",
     voiceDidntCatch: "Didn't catch that, try again",
-    voiceAriaLabel: "Search by voice"
+    voiceAriaLabel: "Search by voice",
+
+    // Reliability & Payments
+    reviewOrder: "Review Order",
+    raiseDispute: "Raise Dispute",
+    reliabilityScore: "Reliability Score"
   },
   hi: {
     appName: "नोवाकृषि",
@@ -233,7 +238,12 @@ export const translations: Record<Language, Record<string, string>> = {
     voiceTapToSearch: "आवाज़ से खोजने के लिए माइक दबाएं",
     voiceNotSupported: "आपके ब्राउज़र में वॉइस सर्च काम नहीं करता",
     voiceDidntCatch: "कुछ समझ नहीं आया, फिर से बोलें",
-    voiceAriaLabel: "आवाज़ से खोजें"
+    voiceAriaLabel: "आवाज़ से खोजें",
+
+    // Reliability & Payments
+    reviewOrder: "ऑर्डर की समीक्षा करें",
+    raiseDispute: "विवाद दर्ज करें",
+    reliabilityScore: "विश्वसनीयता स्कोर"
   },
   mr: {
     appName: "कृषी शील्ड AI",
@@ -330,6 +340,11 @@ export const translations: Record<Language, Record<string, string>> = {
     voiceTapToSearch: "आवाजाने शोधण्यासाठी माइक दाबा",
     voiceNotSupported: "तुमच्या ब्राउझरवर व्हॉइस शोध समर्थित नाही",
     voiceDidntCatch: "काही समजले नाही, पुन्हा सांगा",
-    voiceAriaLabel: "आवाजाने शोधा"
+    voiceAriaLabel: "आवाजाने शोधा",
+
+    // Reliability & Payments
+    reviewOrder: "ऑर्डरचे पुनरावलोकन करा",
+    raiseDispute: "तक्रार नोंदवा",
+    reliabilityScore: "विश्वसनीयता स्कोअर"
   }
 };

@@ -5,6 +5,7 @@ import { Product } from '../models/Product.js';
 import { UserResponse } from '../models/User.js';
 import { cartService } from './cartService.js';
 import { paymentService } from './paymentService.js';
+import { recalculateReliabilityScore } from './reliabilityService.js';
 
 export interface CreateOrderPayload {
   items?: { productId: string; quantity: number }[];
@@ -406,6 +407,16 @@ export const orderService = {
 
     // Return the latest doc after escrow release if it happened
     const finalDoc = await Order.findById(orderId);
+
+    if (newStatus === 'DELIVERED' && finalDoc) {
+      try {
+        await recalculateReliabilityScore(finalDoc.buyerId.toString());
+        await recalculateReliabilityScore(finalDoc.sellerId.toString());
+      } catch (err) {
+        console.error('Failed to recalculate reliability score:', err);
+      }
+    }
+
     return { success: true, order: this.toOrderDTO(finalDoc || updated) };
   }
 };

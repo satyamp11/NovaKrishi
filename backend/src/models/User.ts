@@ -34,6 +34,17 @@ export interface VehicleInfo {
   maxCapacityKg?: number;
 }
 
+export interface ReliabilityMetrics {
+  score: number; // 0-100
+  totalOrders: number;
+  completedOrders: number;
+  disputesRaisedAgainst: number;
+  disputesResolved: number;
+  avgPaymentDelayDays: number;
+  badge: 'trusted' | 'good' | 'new' | 'flagged';
+}
+
+
 export interface RegisterDTO {
   name: string;
   emailOrPhone: string;
@@ -53,6 +64,8 @@ export interface RegisterDTO {
   deliveryAddress?: DeliveryAddress;
   businessInfo?: BusinessInfo;
   vehicleInfo?: VehicleInfo;
+  
+  reliability: ReliabilityMetrics;
 }
 
 export interface LoginDTO {
@@ -84,6 +97,9 @@ export interface IUser extends Document {
   businessInfo?: BusinessInfo;
   vehicleInfo?: VehicleInfo;
 
+  reliability: ReliabilityMetrics;
+
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -108,6 +124,7 @@ export interface UserResponse {
   deliveryAddress?: DeliveryAddress;
   businessInfo?: BusinessInfo;
   vehicleInfo?: VehicleInfo;
+  reliability: ReliabilityMetrics;
 
   createdAt: string;
 }
@@ -207,6 +224,15 @@ const UserSchema: Schema = new Schema(
       licenseNumber: { type: String, default: '' },
       operatingDistrict: { type: String, default: '' },
       maxCapacityKg: { type: Number, default: 1000 }
+    },
+    reliability: {
+      score: { type: Number, default: 70 },
+      totalOrders: { type: Number, default: 0 },
+      completedOrders: { type: Number, default: 0 },
+      disputesRaisedAgainst: { type: Number, default: 0 },
+      disputesResolved: { type: Number, default: 0 },
+      avgPaymentDelayDays: { type: Number, default: 0 },
+      badge: { type: String, enum: ['trusted', 'good', 'new', 'flagged'], default: 'new' }
     }
   },
   {
@@ -236,6 +262,7 @@ export function toUserResponse(user: IUser): UserResponse {
     deliveryAddress: user.deliveryAddress,
     businessInfo: user.businessInfo,
     vehicleInfo: user.vehicleInfo,
+    reliability: user.reliability,
     createdAt: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString()
   };
 }
