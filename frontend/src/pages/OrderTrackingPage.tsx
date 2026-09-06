@@ -23,7 +23,7 @@ import {
   ErrorState,
   useToast,
 } from '../components/ui';
-import { apiService, DeliveryTrackingData, DeliveryStatus } from '../services/apiService';
+import { apiService, DeliveryTrackingData } from '../services/apiService';
 import { ReliabilityBadge } from '../components/ui/ReliabilityBadge';
 import { EscrowStatusTimeline } from '../components/checkout/EscrowStatusTimeline';
 import { useAuth } from '../context/AuthContext';
@@ -109,6 +109,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
     if (orderId) {
       fetchTracking();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   useEffect(() => {
@@ -133,9 +134,10 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
   // Update vehicle position along the SVG path
   useEffect(() => {
     if (pathRef.current && tracking) {
-      const length = pathRef.current.getTotalLength();
+      const pathEl = pathRef.current as any;
+      const length = pathEl.getTotalLength ? pathEl.getTotalLength() : 1000;
       const progress = Math.max(0, Math.min(1, routePercent / 100));
-      const point = pathRef.current.getPointAtLength(progress * length);
+      const point = pathEl.getPointAtLength ? pathEl.getPointAtLength(progress * length) : { x: 50, y: 50 };
       setVehiclePos({ x: point.x, y: point.y });
     }
   }, [routePercent, tracking, maxDistance]);
