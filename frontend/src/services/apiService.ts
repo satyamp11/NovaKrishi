@@ -508,6 +508,14 @@ export interface CommunityAlertRecord {
   createdAt: string;
 }
 
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('krishi_shield_auth_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 export const apiService = {
   // Admin Dashboard API Methods (Phase 12)
   async getAdminMetrics(token: string): Promise<{ success: boolean; metrics?: AdminMetricsDTO; message?: string }> {
@@ -1200,18 +1208,23 @@ export const apiService = {
     }
   },
 
-  // Farmer Profile API Methods
-  async getUserProfile(token: string): Promise<AuthApiResponse> {
+  // User Profile API Methods
+  async getUserProfile(idOrToken?: string): Promise<{ success: boolean; user?: any; message?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/users/profile`, {
+      const isJwt = idOrToken && idOrToken.includes('.') && idOrToken.length > 30;
+      const url = (!idOrToken || isJwt) ? `${API_BASE_URL}/users/profile` : `${API_BASE_URL}/users/profile/${idOrToken}`;
+      const token = isJwt ? idOrToken : localStorage.getItem('krishi_shield_auth_token');
+      const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
-      return await response.json();
-    } catch (err) {
-      return { success: false, message: 'Failed to fetch user profile.' };
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to fetch user profile.' };
+      return data.user ? { success: true, user: data.user } : data;
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to fetch user profile.' };
     }
   },
 
@@ -1390,20 +1403,6 @@ export const apiService = {
   },
 
   // --- Reviews ---
-
-
-  async getUserProfile(id: string): Promise<{ success: boolean; user?: any; message?: string }> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/profile/${id}`, {
-        headers: getAuthHeaders()
-      });
-      const data = await response.json();
-      if (!response.ok) return { success: false, message: data.message };
-      return { success: true, user: data.user };
-    } catch (e: any) {
-      return { success: false, message: e.message };
-    }
-  },
 
   async createReview(payload: { orderId: string, revieweeId: string, rating: number, comment?: string, tags?: string[] }): Promise<{ success: boolean; data?: any; message?: string }> {
     try {

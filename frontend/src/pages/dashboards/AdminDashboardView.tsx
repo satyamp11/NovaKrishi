@@ -65,7 +65,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       ]);
       if (mRes.success && mRes.metrics) setMetrics(mRes.metrics);
       if (fRes.success && fRes.farmers) setFarmers(fRes.farmers);
-      if (activeSection === 'disputes' && dRes) setDisputes(dRes as any[]);
+      if (activeSection === 'disputes' && dRes && 'data' in dRes && Array.isArray(dRes.data)) setDisputes(dRes.data);
     } catch (e) {
       console.error('Error fetching admin data:', e);
     } finally {
@@ -105,7 +105,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const handleResolveDispute = async (disputeId: string, status: 'resolved' | 'rejected') => {
     setUpdatingId(disputeId);
     try {
-      const res = await apiService.updateDisputeStatus(disputeId, status, `Admin ${status} the dispute`);
+      const res = await apiService.updateDisputeStatus(disputeId, { status, resolution: `Admin ${status} the dispute` });
       if (res) {
         toast.success(`Dispute ${status}`, `The dispute has been ${status}.`);
         fetchAdminData();
@@ -394,7 +394,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           </div>
           
           {loading && <LoadingState message="Fetching open disputes..." />}
-          {!loading && disputes.length === 0 && <EmptyState icon={<CheckCircle2 className="w-10 h-10 text-emerald-400" />} title="No Open Disputes" message="All transactions are running smoothly." />}
+          {!loading && disputes.length === 0 && <EmptyState icon={<CheckCircle2 className="w-10 h-10 text-emerald-400" />} title="No Open Disputes" description="All transactions are running smoothly." />}
           {!loading && disputes.length > 0 && (
             <div className="space-y-4">
               {disputes.map((dispute) => (
@@ -402,7 +402,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-900 uppercase">{dispute.type.replace('_', ' ')}</span>
-                      <Badge variant={dispute.status === 'open' ? 'warning' : dispute.status === 'resolved' ? 'success' : 'slate'} size="sm">
+                      <Badge variant={dispute.status === 'open' ? 'warning' : dispute.status === 'resolved' ? 'success' : 'neutral'} size="sm">
                         {dispute.status.toUpperCase()}
                       </Badge>
                     </div>
