@@ -3,12 +3,10 @@ import {
   Truck,
   MapPin,
   Clock,
-  ShieldCheck,
   CheckCircle2,
   Package,
   Play,
   Pause,
-  RotateCcw,
   ArrowLeft,
   Navigation,
   Sparkles,
@@ -144,7 +142,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
 
   // Controlled Demo Simulator Effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isSimulating && tracking) {
       interval = setInterval(async () => {
         try {
