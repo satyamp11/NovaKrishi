@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { User, IUser, RegisterDTO, UserResponse } from '../models/User.js';
+import { User, IUser, RegisterDTO, UserResponse, ReliabilityMetrics } from '../models/User.js';
 
 export const userService = {
   async createUser(dto: RegisterDTO): Promise<UserResponse> {
@@ -83,6 +83,16 @@ export const userService = {
   },
 
   toUserResponse(user: IUser): UserResponse {
+    const defaultReliability: ReliabilityMetrics = {
+      score: 70,
+      totalOrders: 0,
+      completedOrders: 0,
+      disputesRaisedAgainst: 0,
+      disputesResolved: 0,
+      avgPaymentDelayDays: 0,
+      badge: 'new'
+    };
+
     return {
       id: user._id ? user._id.toString() : '',
       name: user.name,
@@ -102,6 +112,7 @@ export const userService = {
       deliveryAddress: user.deliveryAddress,
       businessInfo: user.businessInfo,
       vehicleInfo: user.vehicleInfo,
+      reliability: user.reliability || defaultReliability,
       createdAt: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString()
     };
   }

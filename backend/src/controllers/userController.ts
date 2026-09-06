@@ -35,7 +35,14 @@ export const userController = {
 
   async getUserProfile(req: AuthenticatedRequest, res: Response) {
     try {
-      const user = await userService.getUserById(req.params.id);
+      const { id } = req.params;
+      if (!id || typeof id !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'User ID is required.'
+        });
+      }
+      const user = await userService.getUserById(id);
       if (!user) {
         return res.status(404).json({
           success: false,

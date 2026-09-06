@@ -65,7 +65,7 @@ export interface RegisterDTO {
   businessInfo?: BusinessInfo;
   vehicleInfo?: VehicleInfo;
   
-  reliability: ReliabilityMetrics;
+  reliability?: ReliabilityMetrics;
 }
 
 export interface LoginDTO {

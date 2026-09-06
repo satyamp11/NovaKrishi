@@ -40,7 +40,12 @@ export const getDisputes = async (req: AuthenticatedRequest, res: Response) => {
 
 export const getDisputeById = async (req: Request, res: Response) => {
   try {
-    const dispute = await disputeService.getDisputeById(req.params.id);
+    const { id } = req.params;
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ message: 'Dispute ID is required' });
+    }
+
+    const dispute = await disputeService.getDisputeById(id);
     if (!dispute) {
       return res.status(404).json({ message: 'Dispute not found' });
     }
@@ -54,6 +59,9 @@ export const updateDisputeStatus = async (req: AuthenticatedRequest, res: Respon
   try {
     // Only admins should be able to reach this if we use roleMiddleware
     const { id } = req.params;
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ message: 'Dispute ID is required' });
+    }
     const { status, resolution, note } = req.body;
 
     const dispute = await disputeService.updateDisputeStatus(id, status, resolution, note);
