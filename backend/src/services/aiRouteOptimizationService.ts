@@ -1,4 +1,5 @@
 import { getPerishabilityScore } from '../config/cropPerishability.js';
+import { getCoordinatesForDistrict } from './locationResolverService.js';
 
 export interface LocationWaypoint {
   id?: string;
@@ -58,6 +59,50 @@ export interface RouteOptimizationResponse {
   };
 }
 
+// ─── Coordinate resolver helper ─────────────────────────────────────────────
+/**
+ * Returns a {lat, lng} coordinate for a waypoint.
+ * Prefers precise stored coordinates (lat/lng already on the location object).
+ * Falls back to district-level resolution from the real_route_locations.csv dataset
+ * if the waypoint only has state+district info and no valid precise coordinates.
+ *
+ * Logs clearly which source was used so route optimization calls are easy to trace.
+ */
+function resolveCoordinates(
+  name: string,
+  lat?: number,
+  lng?: number,
+  state?: string,
+  district?: string
+): { lat: number; lng: number } {
+  // "Precise" means both values are present AND they are not the (0,0) uninitialized placeholder.
+  // We check (lat === 0 && lng === 0) together — NOT lat !== 0 || lng !== 0 independently —
+  // to avoid false-positives where one coordinate is legitimately 0 (rare but theoretically valid).
+  // India has no real locations near (0,0), so (0,0) together safely signals "uninitialized".
+  const isMissing = lat == null || lng == null;
+  const isZeroPlaceholder = lat === 0 && lng === 0;
+  const hasPrecise = !isMissing && !isZeroPlaceholder;
+
+  if (hasPrecise) {
+    console.info(`📍 [RouteOpt] Using precise stored coords for "${name}": (${lat}, ${lng})`);
+    return { lat: lat!, lng: lng! };
+  }
+
+  if (state && district) {
+    const resolved = getCoordinatesForDistrict(state, district);
+    if (resolved) {
+      console.info(`📍 [RouteOpt] District-level fallback for "${name}" (${district}, ${state}): (${resolved.latitude}, ${resolved.longitude})`);
+      return { lat: resolved.latitude, lng: resolved.longitude };
+    }
+    console.warn(`⚠️ [RouteOpt] No district match for "${name}" (${district}, ${state}) — using default Gorakhpur coords`);
+  } else {
+    console.warn(`⚠️ [RouteOpt] No coords or state/district for "${name}" — using default Gorakhpur coords`);
+  }
+
+  // Last-resort default
+  return { lat: 26.7606, lng: 83.3732 };
+}
+
 export const aiRouteOptimizationService = {
   // Modular AI Route Optimization (TSP / VRP Solver Engine)
   async optimizeRoute(payload: OptimizeRoutePayload): Promise<RouteOptimizationResponse> {
@@ -101,19 +146,25 @@ export const aiRouteOptimizationService = {
         if (healthOk) {
           console.log(`✅ ML Routing Engine is healthy. Requesting optimization...`);
           
-          // Build request payload
-          const start = pickups[0];
-          const destination = deliveries[deliveries.length - 1]; // Assume last delivery is destination
-          const waypoints = deliveries.slice(0, -1); // All others are waypoints
+    // Build route payload with resolved coordinates
+    const start = pickups[0];
+    const destination = deliveries[deliveries.length - 1];
+    const waypoints = deliveries.slice(0, -1);
 
-          const quantityKg = payload.quantityKg || deliveries.reduce((acc, loc) => acc + (loc.demandKg || 0), 0) || 1000;
+    const startCoords = resolveCoordinates(start.name, start.lat, start.lng, (start as any).state, (start as any).district);
+    const destCoords = resolveCoordinates(destination.name, destination.lat, destination.lng, (destination as any).state, (destination as any).district);
+
+    const quantityKg = payload.quantityKg || deliveries.reduce((acc, loc) => acc + (loc.demandKg || 0), 0) || 1000;
           const fuelPrice = parseFloat(process.env.FUEL_PRICE_INR_LITRE || '95');
           const date = new Date();
 
           const routeRequest = {
-            start: { name: start.name, latitude: start.lat, longitude: start.lng },
-            destination: { name: destination.name, latitude: destination.lat, longitude: destination.lng },
-            waypoints: waypoints.map(w => ({ name: w.name, latitude: w.lat, longitude: w.lng })),
+            start: { name: start.name, latitude: startCoords.lat, longitude: startCoords.lng },
+            destination: { name: destination.name, latitude: destCoords.lat, longitude: destCoords.lng },
+            waypoints: waypoints.map(w => {
+              const wc = resolveCoordinates(w.name, w.lat, w.lng, (w as any).state, (w as any).district);
+              return { name: w.name, latitude: wc.lat, longitude: wc.lng };
+            }),
             quantity_kg: quantityKg,
             vehicle_type: payload.vehicleType || "Truck",
             traffic_level: "Medium", // TODO: Integrate real-time traffic API
