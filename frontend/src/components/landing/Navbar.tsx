@@ -74,9 +74,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Left Brand Logo */}
           <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none" onClick={() => handleLinkClick('hero')}>
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#1b4332] flex items-center justify-center text-white shadow-xs border border-emerald-800 shrink-0">
-              <Sprout className="w-5 h-5 sm:w-6.5 sm:h-6.5 text-emerald-400" />
-            </div>
+            <img 
+              src="/novakrishi-logo.png" 
+              alt="NovaKrishi" 
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl shadow-xs shrink-0 object-contain bg-white" 
+            />
             <div className="flex flex-col min-w-0">
               <span className="text-xl sm:text-2xl font-black font-brand tracking-tight text-[#1b4332] leading-tight">
                 NovaKrishi

@@ -60,8 +60,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           className="flex items-center gap-2 sm:gap-3 text-left group min-w-0"
         >
           <img 
-            src="/logo.png" 
-            alt="NovaKrishi Logo" 
+            src="/novakrishi-logo.png" 
+            alt="NovaKrishi" 
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
             className="h-8 sm:h-12 w-auto object-contain rounded-xl shadow-sm group-hover:scale-105 transition-transform shrink-0" 
           />
