@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../assets/NovaKrishi.jpeg';
 import { Sun, Sparkles, Globe, Search, User, Bell } from 'lucide-react';
 import type { Language, TabType } from '../types';
 import { translations } from '../translations';

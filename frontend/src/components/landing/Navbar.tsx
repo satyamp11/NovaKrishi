@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sprout, Globe, Menu, X, ArrowRight, User, LogOut, Sparkles } from 'lucide-react';
+import logoImg from '../../assets/NovaKrishi.jpeg';
 import type { Language } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
