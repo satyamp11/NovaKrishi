@@ -79,7 +79,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
         
         // Fetch delivery partner profile for reliability badge
         if (res.tracking.deliveryPartner?.id) {
-          const profileRes = await apiService.getUserProfile(res.tracking.deliveryPartner.id);
+          const profileRes = await apiService.getUserProfileById(res.tracking.deliveryPartner.id);
           if (profileRes.success && profileRes.user) {
             setDeliveryPartnerProfile(profileRes.user);
           }

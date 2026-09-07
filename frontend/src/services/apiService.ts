@@ -1414,7 +1414,7 @@ export const apiService = {
   // --- Reviews ---
 
 
-  async getUserProfile(id: string): Promise<{ success: boolean; user?: any; message?: string }> {
+  async getUserProfileById(id: string): Promise<{ success: boolean; user?: any; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/profile/${id}`, {
         headers: getAuthHeaders()
