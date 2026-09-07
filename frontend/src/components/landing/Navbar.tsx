@@ -76,7 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Left Brand Logo */}
           <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none" onClick={() => handleLinkClick('hero')}>
             <img 
-              src="/novakrishi-logo.png" 
+              src={logoImg} 
               alt="NovaKrishi" 
               className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl shadow-xs shrink-0 object-contain bg-white" 
             />
