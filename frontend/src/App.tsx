@@ -50,8 +50,8 @@ import { apiService, UserRole } from './services/apiService';
 const PROTECTED_TABS: TabType[] = ['home', 'scan', 'result', 'map', 'alerts', 'report', 'community', 'profile'];
 
 export function AppContent() {
-  // App State - Default to 'marketplace' for Agricultural Marketplace, Escrow & Route Optimization
-  const [activeTab, setActiveTab] = useState<string>('marketplace');
+  // App State - Default to 'landing' so Home Page opens first on load
+  const [activeTab, setActiveTab] = useState<string>('landing');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [selectedTrackingOrderId, setSelectedTrackingOrderId] = useState<string>('ORD-2026-849201');
   const [language, setLanguage] = useState<Language>('hi');
