@@ -13,6 +13,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { Navbar, Footer, Button, Badge, LoadingState } from '../components/ui';
+import { FairPriceEstimator } from '../components/price/FairPriceEstimator';
 import { apiService } from '../services/apiService';
 import type { MarketRate } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -551,6 +552,11 @@ export const PriceInsightsPage: React.FC<PriceInsightsPageProps> = ({
 
           </section>
         )}
+
+        {/* AI Fair Price ML Predictor */}
+        <section>
+          <FairPriceEstimator />
+        </section>
 
         {/* Cross-Link Cards to Other AI Modules */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-5">

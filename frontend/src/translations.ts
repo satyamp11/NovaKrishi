@@ -126,7 +126,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Demo Simulation
     simStarted: "Simulation Started",
     simEnRoute: "Vehicle en route",
-    simDelivered: "Delivered"
+    simDelivered: "Delivered",
+
+    // AI Fair Price Estimator
+    fairPriceTitle: "AI Fair Price Estimator",
+    fairPriceDesc: "Get real-time ML predicted prices based on historical trends.",
+    selectState: "Select State",
+    selectDistrict: "Select District",
+    selectCommodity: "Select Commodity",
+    selectVariety: "Select Variety",
+    selectGrade: "Select Grade",
+    selectMonth: "Select Arrival Month",
+    predictPriceBtn: "Predict Fair Price",
+    predicting: "Analyzing AI Models...",
+    noOptionsAvailable: "No options available for this selection",
+    predictedPrice: "Predicted Modal Price",
+    perUnit: "per",
+    aiModelV: "Powered by Model v"
   },
   hi: {
     appName: "नोवाकृषि",
@@ -253,7 +269,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Demo Simulation
     simStarted: "सिमुलेशन शुरू हुआ",
     simEnRoute: "वाहन रास्ते में है",
-    simDelivered: "पहुंचा दिया गया"
+    simDelivered: "पहुंचा दिया गया",
+
+    // AI Fair Price Estimator
+    fairPriceTitle: "एआई उचित मूल्य अनुमान",
+    fairPriceDesc: "ऐतिहासिक रुझानों के आधार पर वास्तविक समय एमएल अनुमानित मूल्य प्राप्त करें।",
+    selectState: "राज्य चुनें",
+    selectDistrict: "जिला चुनें",
+    selectCommodity: "फसल चुनें",
+    selectVariety: "किस्म चुनें",
+    selectGrade: "ग्रेड चुनें",
+    selectMonth: "आगमन का महीना चुनें",
+    predictPriceBtn: "उचित मूल्य का अनुमान लगाएं",
+    predicting: "एआई मॉडल का विश्लेषण कर रहा है...",
+    noOptionsAvailable: "इस चयन के लिए कोई विकल्प उपलब्ध नहीं है",
+    predictedPrice: "अनुमानित मोडल मूल्य",
+    perUnit: "प्रति",
+    aiModelV: "मॉडल v द्वारा संचालित"
   },
   mr: {
     appName: "कृषी शील्ड AI",
@@ -360,6 +392,22 @@ export const translations: Record<Language, Record<string, string>> = {
     // Demo Simulation
     simStarted: "सिम्युलेशन सुरू झाले",
     simEnRoute: "वाहन मार्गावर आहे",
-    simDelivered: "वितरित केले"
+    simDelivered: "वितरित केले",
+
+    // AI Fair Price Estimator
+    fairPriceTitle: "AI योग्य किंमत अंदाज",
+    fairPriceDesc: "ऐतिहासिक ट्रेंडवर आधारित रिअल-टाइम ML अंदाजित किंमती मिळवा.",
+    selectState: "राज्य निवडा",
+    selectDistrict: "जिल्हा निवडा",
+    selectCommodity: "पीक निवडा",
+    selectVariety: "प्रकार निवडा",
+    selectGrade: "दर्जा निवडा",
+    selectMonth: "आगमनाचा महिना निवडा",
+    predictPriceBtn: "योग्य किंमतीचा अंदाज लावा",
+    predicting: "AI मॉडेलचे विश्लेषण करत आहे...",
+    noOptionsAvailable: "या निवडीसाठी कोणतेही पर्याय उपलब्ध नाहीत",
+    predictedPrice: "अंदाजित मोडल किंमत",
+    perUnit: "प्रति",
+    aiModelV: "मॉडेल v द्वारा समर्थित"
   }
 };
