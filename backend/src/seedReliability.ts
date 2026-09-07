@@ -34,7 +34,7 @@ async function seedReliabilityData() {
       buyerRole: buyer.role,
       sellerId: farmer._id,
       sellerName: farmer.name,
-      fpoName: farmer.businessInfo?.fpoName || '',
+      fpoName: farmer.farmInfo?.fpoName || '',
       sellerDistrict: farmer.district || 'Test',
       sellerState: farmer.state || 'Test',
       items: [{
@@ -86,7 +86,7 @@ async function seedReliabilityData() {
     raisedAgainst: farmer._id,
     type: 'quality_issue',
     description: 'Minor bruising on tomatoes but mostly fine.',
-    status: 'RESOLVED',
+    status: 'resolved',
     resolution: 'Refunded 10% for the bruised portion.'
   });
 

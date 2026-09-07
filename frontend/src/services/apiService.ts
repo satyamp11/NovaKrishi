@@ -2,7 +2,36 @@ import type { MarketRate } from '../types';
 export type { MarketRate };
 import { MOCK_MARKET_RATES, ALL_INDIAN_STATES } from '../mockData';
 
-const API_BASE_URL = '/api';
+/**
+ * Resolves the backend API base URL:
+ * - Checks VITE_API_URL, VITE_API_BASE_URL, or VITE_BACKEND_URL
+ * - Strips trailing slashes and ensures /api path
+ * - In production (import.meta.env.PROD), defaults to 'https://novakrishi.onrender.com/api'
+ * - In development, defaults to '/api' (proxied by Vite dev server to localhost:5000)
+ */
+const getApiBaseUrl = (): string => {
+  const envUrl = (
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_BACKEND_URL ||
+    ''
+  ).trim();
+
+  if (envUrl) {
+    const cleanUrl = envUrl.replace(/\/+$/, '');
+    return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+  }
+
+  // When running a production build, default to the deployed Render backend
+  if (import.meta.env.PROD) {
+    return 'https://novakrishi.onrender.com/api';
+  }
+
+  // Local development default uses the Vite proxy configuration
+  return '/api';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export type UserRole = 'farmer' | 'consumer' | 'bulk_buyer' | 'delivery_partner' | 'admin';
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
@@ -507,6 +536,14 @@ export interface CommunityAlertRecord {
   recommendationsHindi: string[];
   createdAt: string;
 }
+
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('krishi_shield_auth_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
 
 export const apiService = {
   // Admin Dashboard API Methods (Phase 12)
@@ -1222,18 +1259,23 @@ export const apiService = {
     }
   },
 
-  // Farmer Profile API Methods
-  async getUserProfile(token: string): Promise<AuthApiResponse> {
+  // User Profile API Methods
+  async getUserProfile(idOrToken?: string): Promise<{ success: boolean; user?: any; message?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/users/profile`, {
+      const isJwt = idOrToken && idOrToken.includes('.') && idOrToken.length > 30;
+      const url = (!idOrToken || isJwt) ? `${API_BASE_URL}/users/profile` : `${API_BASE_URL}/users/profile/${idOrToken}`;
+      const token = isJwt ? idOrToken : localStorage.getItem('krishi_shield_auth_token');
+      const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
-      return await response.json();
-    } catch (err) {
-      return { success: false, message: 'Failed to fetch user profile.' };
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message || 'Failed to fetch user profile.' };
+      return data.user ? { success: true, user: data.user } : data;
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to fetch user profile.' };
     }
   },
 
@@ -1413,7 +1455,6 @@ export const apiService = {
 
   // --- Reviews ---
 
-
   async getUserProfileById(id: string): Promise<{ success: boolean; user?: any; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/profile/${id}`, {
@@ -1426,7 +1467,6 @@ export const apiService = {
       return { success: false, message: e.message };
     }
   },
-
   async createReview(payload: { orderId: string, revieweeId: string, rating: number, comment?: string, tags?: string[] }): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/reviews`, {

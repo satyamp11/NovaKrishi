@@ -37,7 +37,7 @@ import {
   ErrorState,
   useToast,
 } from '../components/ui';
-import { apiService, ProductItem, ProductCategory, ProductsFilterParams } from '../services/apiService';
+import { apiService, ProductItem, ProductCategory, ProductsFilterParams, API_BASE_URL } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import { CartDrawer } from '../components/cart/CartDrawer';
 
@@ -172,7 +172,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/products/matches?category=${selectedCategory === 'All' ? '' : selectedCategory}&qualityPreference=${organicOnly ? 'organic' : verifiedOnly ? 'fpo_verified' : 'any'}`, {
+      const res = await fetch(`${API_BASE_URL}/products/matches?category=${selectedCategory === 'All' ? '' : selectedCategory}&qualityPreference=${organicOnly ? 'organic' : verifiedOnly ? 'fpo_verified' : 'any'}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

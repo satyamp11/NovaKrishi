@@ -35,6 +35,9 @@ export const createReview = async (req: AuthenticatedRequest, res: Response) => 
 export const getUserReviews = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
     const data = await reviewService.getUserReviews(userId);
     res.json(data);
   } catch (error: any) {
@@ -45,6 +48,9 @@ export const getUserReviews = async (req: Request, res: Response) => {
 export const getOrderReviews = async (req: Request, res: Response) => {
   try {
     const { orderId } = req.params;
+    if (!orderId || typeof orderId !== 'string') {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
     const reviews = await reviewService.getOrderReviews(orderId);
     res.json(reviews);
   } catch (error: any) {
