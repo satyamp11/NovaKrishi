@@ -732,6 +732,28 @@ export const apiService = {
     }
   },
 
+  async startDemoSimulation(orderId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/tracking/start`, {
+        method: 'POST'
+      });
+      return await response.json();
+    } catch (err) {
+      return { success: false, message: 'Failed to start demo simulation.' };
+    }
+  },
+
+  async stopDemoSimulation(orderId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/tracking/stop`, {
+        method: 'POST'
+      });
+      return await response.json();
+    } catch (err) {
+      return { success: false, message: 'Failed to stop demo simulation.' };
+    }
+  },
+
   async updateDeliveryLocation(payload: {
     orderId?: string;
     deliveryId?: string;
@@ -1433,6 +1455,18 @@ export const apiService = {
 
   // --- Reviews ---
 
+  async getUserProfileById(id: string): Promise<{ success: boolean; user?: any; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/profile/${id}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      if (!response.ok) return { success: false, message: data.message };
+      return { success: true, user: data.user };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
   async createReview(payload: { orderId: string, revieweeId: string, rating: number, comment?: string, tags?: string[] }): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/reviews`, {
