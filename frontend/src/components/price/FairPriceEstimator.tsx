@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
 import { Calculator, AlertTriangle, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { Button } from '../ui';
-import { useLanguage } from '../../context/LanguageContext';
 import { translations } from '../../translations';
+import type { Language } from '../../types';
 
-export const FairPriceEstimator: React.FC = () => {
-  const { language } = useLanguage();
-  const t = translations[language];
+export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language = 'en' }) => {
+  const t = translations[language] || translations['en'];
 
   const [states, setStates] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
