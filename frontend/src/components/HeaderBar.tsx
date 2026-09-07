@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sun, Sparkles, Globe, Search, User, Bell } from 'lucide-react';
+import logoImg from '../assets/logo.png';
 import type { Language, TabType } from '../types';
 import { translations } from '../translations';
 
@@ -60,7 +61,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           className="flex items-center gap-2 sm:gap-3 text-left group min-w-0"
         >
           <img 
-            src="/novakrishi-logo.png" 
+            src={logoImg} 
             alt="NovaKrishi" 
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
             className="h-8 sm:h-12 w-auto object-contain rounded-xl shadow-sm group-hover:scale-105 transition-transform shrink-0" 
