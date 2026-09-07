@@ -22,6 +22,7 @@ import bulkRequestRouter from './routes/bulkRequest.routes.js';
 import adminRouter from './routes/admin.routes.js';
 import reviewRouter from './routes/reviewRoutes.js';
 import disputeRouter from './routes/disputeRoutes.js';
+import qualityRouter from './routes/quality.routes.js';
 import { deliveryController } from './controllers/deliveryController.js';
 
 export const app = express();
@@ -55,6 +56,7 @@ app.use('/api/bulk-requests', bulkRequestRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/disputes', disputeRouter);
+app.use('/api/quality', qualityRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/scans', scanRouter);
 app.use('/api/alerts', alertRouter);
