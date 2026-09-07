@@ -2,7 +2,36 @@ import type { MarketRate } from '../types';
 export type { MarketRate };
 import { MOCK_MARKET_RATES, ALL_INDIAN_STATES } from '../mockData';
 
-const API_BASE_URL = '/api';
+/**
+ * Resolves the backend API base URL:
+ * - Checks VITE_API_URL, VITE_API_BASE_URL, or VITE_BACKEND_URL
+ * - Strips trailing slashes and ensures /api path
+ * - In production (import.meta.env.PROD), defaults to 'https://novakrishi.onrender.com/api'
+ * - In development, defaults to '/api' (proxied by Vite dev server to localhost:5000)
+ */
+const getApiBaseUrl = (): string => {
+  const envUrl = (
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_BACKEND_URL ||
+    ''
+  ).trim();
+
+  if (envUrl) {
+    const cleanUrl = envUrl.replace(/\/+$/, '');
+    return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+  }
+
+  // When running a production build, default to the deployed Render backend
+  if (import.meta.env.PROD) {
+    return 'https://novakrishi.onrender.com/api';
+  }
+
+  // Local development default uses the Vite proxy configuration
+  return '/api';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export type UserRole = 'farmer' | 'consumer' | 'bulk_buyer' | 'delivery_partner' | 'admin';
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';

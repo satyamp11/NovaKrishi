@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '../services/apiService';
+import { apiService, API_BASE_URL } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui';
 
@@ -54,7 +54,7 @@ export const useRazorpayCheckout = ({ onSuccess, onPaymentHeld }: UseRazorpayChe
     setIsProcessing(true);
     try {
       // 1. Initiate order from backend
-      const resInitiate = await fetch(`/api/payments/create`, {
+      const resInitiate = await fetch(`${API_BASE_URL}/payments/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ orderId }),
@@ -77,7 +77,7 @@ export const useRazorpayCheckout = ({ onSuccess, onPaymentHeld }: UseRazorpayChe
         handler: async function (response: any) {
           // 3. Confirm payment verification on backend
           try {
-            const verifyReq = await fetch(`/api/payments/verify`, {
+            const verifyReq = await fetch(`${API_BASE_URL}/payments/verify`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
               body: JSON.stringify({

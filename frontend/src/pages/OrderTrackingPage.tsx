@@ -25,7 +25,7 @@ import {
   ErrorState,
   useToast,
 } from '../components/ui';
-import { apiService, DeliveryTrackingData, DeliveryStatus } from '../services/apiService';
+import { apiService, DeliveryTrackingData, DeliveryStatus, API_BASE_URL } from '../services/apiService';
 import { ReliabilityBadge } from '../components/ui/ReliabilityBadge';
 import { EscrowStatusTimeline } from '../components/checkout/EscrowStatusTimeline';
 import { useAuth } from '../context/AuthContext';
@@ -75,7 +75,7 @@ export const OrderTrackingPage: React.FC<OrderTrackingPageProps> = ({
 
       // Fetch payment/escrow status
       if (token) {
-        const paymentRes = await fetch(`/api/payments/${orderId}`, {
+        const paymentRes = await fetch(`${API_BASE_URL}/payments/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const paymentData = await paymentRes.json();
