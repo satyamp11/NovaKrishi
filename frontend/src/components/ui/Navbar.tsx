@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     if (tabId === 'bulk-buyer-nav') {
       onNavigate('role-dashboard');
     } else if (tabId === 'ai-forecast-nav') {
-      onNavigate('role-dashboard');
+      onNavigate('demand-forecast');
     } else if (tabId === 'how-it-works') {
       onNavigate('landing');
       setTimeout(() => {

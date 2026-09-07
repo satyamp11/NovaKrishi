@@ -19,6 +19,7 @@ interface KrishiLandingPageProps {
   onLanguageChange: (lang: Language) => void;
   onLaunchApp: () => void;
   onLaunchScanner: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 export const KrishiLandingPage: React.FC<KrishiLandingPageProps> = ({
@@ -26,6 +27,7 @@ export const KrishiLandingPage: React.FC<KrishiLandingPageProps> = ({
   onLanguageChange,
   onLaunchApp,
   onLaunchScanner,
+  onNavigateTab,
 }) => {
   const scrollToSection = (sectionId: string) => {
     const el = document.getElementById(sectionId);
@@ -68,7 +70,12 @@ export const KrishiLandingPage: React.FC<KrishiLandingPageProps> = ({
       <MarketRatesSection language={language} />
 
       {/* 6. AI INSIGHTS SECTION ("AI That Helps Farmers Decide Better.") */}
-      <AIInsightsSection onExploreAI={onLaunchApp} />
+      <AIInsightsSection
+        onExploreAI={onLaunchApp}
+        onNavigateDemandForecast={() => (onNavigateTab ? onNavigateTab('demand-forecast') : onLaunchApp())}
+        onNavigatePriceInsights={() => (onNavigateTab ? onNavigateTab('price-insights') : onLaunchApp())}
+        onNavigateRouteOptimization={() => (onNavigateTab ? onNavigateTab('logistics-optimization') : onLaunchApp())}
+      />
 
       {/* 7. HOW IT WORKS */}
       <HowItWorksSection language={language} />

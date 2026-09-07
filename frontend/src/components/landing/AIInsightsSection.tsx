@@ -1,37 +1,49 @@
 import React from 'react';
-import { Cpu, TrendingUp, Truck, Sparkles, Sprout, ArrowRight } from 'lucide-react';
+import { Cpu, TrendingUp, Truck, Sparkles, ArrowRight } from 'lucide-react';
 
 interface AIInsightsSectionProps {
   onExploreAI?: () => void;
+  onNavigateDemandForecast?: () => void;
+  onNavigatePriceInsights?: () => void;
+  onNavigateRouteOptimization?: () => void;
 }
 
 export const AIInsightsSection: React.FC<AIInsightsSectionProps> = ({
   onExploreAI = () => {},
+  onNavigateDemandForecast,
+  onNavigatePriceInsights,
+  onNavigateRouteOptimization,
 }) => {
   const cards = [
     {
+      id: 'demand-forecast',
       icon: Cpu,
       title: 'AI Demand Forecast',
       subtitle: 'Predict Upcoming Demand Spikes',
       description:
         'Analyzes regional crop yields, climate patterns, and consumer purchasing spikes to recommend optimal harvest timing.',
       badge: 'Demand Intelligence',
+      onNavigate: onNavigateDemandForecast || onExploreAI,
     },
     {
+      id: 'price-insights',
       icon: TrendingUp,
       title: 'Price Insights',
       subtitle: 'Understand Market Rate Trends',
       description:
         'Tracks real-time mandi prices across states to advise farmers when and where to list produce for maximum profit.',
       badge: 'Mandi Benchmarks',
+      onNavigate: onNavigatePriceInsights || onExploreAI,
     },
     {
+      id: 'route-optimization',
       icon: Truck,
       title: 'Smart Route Optimization',
       subtitle: 'Reduce Transit Distance & Cost',
       description:
         'Uses Vehicle Routing Problem (VRP) algorithms to optimize multi-stop pickup routes and lower logistics fees.',
       badge: 'Logistics VRP Engine',
+      onNavigate: onNavigateRouteOptimization || onExploreAI,
     },
   ];
 
@@ -55,16 +67,25 @@ export const AIInsightsSection: React.FC<AIInsightsSectionProps> = ({
 
         {/* 3 Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {cards.map((c, idx) => {
+          {cards.map((c) => {
             const Icon = c.icon;
             return (
               <div
-                key={idx}
-                className="bg-white p-6 rounded-3xl border border-stone-200 shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
+                key={c.id}
+                role="button"
+                tabIndex={0}
+                onClick={c.onNavigate}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    c.onNavigate();
+                  }
+                }}
+                className="group bg-white p-6 rounded-3xl border border-stone-200 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all space-y-4 flex flex-col justify-between cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#1b4332] flex items-center justify-center border border-emerald-200">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#1b4332] flex items-center justify-center border border-emerald-200 group-hover:bg-emerald-100/70 transition-colors">
                       <Icon className="w-6 h-6 text-emerald-700" />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded-full border border-emerald-200">
@@ -73,7 +94,9 @@ export const AIInsightsSection: React.FC<AIInsightsSectionProps> = ({
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-black text-slate-900">{c.title}</h3>
+                    <h3 className="text-lg font-black text-slate-900 group-hover:text-[#143022] transition-colors">
+                      {c.title}
+                    </h3>
                     <p className="text-xs font-bold text-emerald-700 mt-0.5">{c.subtitle}</p>
                   </div>
 
@@ -81,11 +104,15 @@ export const AIInsightsSection: React.FC<AIInsightsSectionProps> = ({
                 </div>
 
                 <button
-                  onClick={onExploreAI}
-                  className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-black text-[#1b4332] hover:text-emerald-700 w-full"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    c.onNavigate();
+                  }}
+                  className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-black text-[#1b4332] group-hover:text-emerald-700 w-full cursor-pointer"
                 >
                   <span>Explore AI Feature</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </button>
               </div>
             );

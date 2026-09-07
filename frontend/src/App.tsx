@@ -23,6 +23,8 @@ import { OrdersPage } from './pages/OrdersPage';
 import { OrderTrackingPage } from './pages/OrderTrackingPage';
 import { LogisticsPage } from './pages/LogisticsPage';
 import { RouteOptimizationPage } from './pages/RouteOptimizationPage';
+import { AIDemandForecastPage } from './pages/AIDemandForecastPage';
+import { PriceInsightsPage } from './pages/PriceInsightsPage';
 import { ToastProvider, useToast } from './components/ui/Toast';
 import { Navbar, Footer, Button, Badge } from './components/ui';
 
@@ -237,7 +239,7 @@ export function AppContent() {
     }
   };
 
-  const showHeaderAndNav = activeTab !== 'splash' && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'ui-showcase' && activeTab !== 'role-dashboard' && activeTab !== 'marketplace' && activeTab !== 'product-detail' && activeTab !== 'orders' && activeTab !== 'logistics' && activeTab !== 'logistics-optimization' && activeTab !== 'tracking';
+  const showHeaderAndNav = activeTab !== 'splash' && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'ui-showcase' && activeTab !== 'role-dashboard' && activeTab !== 'marketplace' && activeTab !== 'product-detail' && activeTab !== 'orders' && activeTab !== 'logistics' && activeTab !== 'logistics-optimization' && activeTab !== 'demand-forecast' && activeTab !== 'price-insights' && activeTab !== 'mandi' && activeTab !== 'tracking';
 
   const activeUserRole: UserRole = user?.role || simulatedRole;
 
@@ -329,7 +331,21 @@ export function AppContent() {
         {/* PHASE 10: AI Route Optimization Page (/logistics/optimization) */}
         {activeTab === 'logistics-optimization' && (
           <RouteOptimizationPage
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            onNavigateTab={(tab) => navigateToTab(tab)}
+          />
+        )}
+
+        {/* AI Demand Forecasting Page (/ai/demand-forecast) */}
+        {activeTab === 'demand-forecast' && (
+          <AIDemandForecastPage
+            onNavigateTab={(tab) => navigateToTab(tab)}
+          />
+        )}
+
+        {/* AI Price Insights & Market Rates Page (/price-insights) */}
+        {(activeTab === 'price-insights' || activeTab === 'mandi') && (
+          <PriceInsightsPage
+            onNavigateTab={(tab) => navigateToTab(tab)}
           />
         )}
 
@@ -474,6 +490,7 @@ export function AppContent() {
             onLanguageChange={setLanguage}
             onLaunchApp={() => handleNavigateWithAuth('marketplace')}
             onLaunchScanner={() => handleNavigateWithAuth('scan')}
+            onNavigateTab={(tab) => navigateToTab(tab)}
           />
         )}
 
