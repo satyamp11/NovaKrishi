@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { StatCard, Badge, Button, LoadingState, ErrorState, useToast } from '../../components/ui';
 import { AIDemandForecastSection } from '../../components/farmer/AIDemandForecastSection';
-import { FruitQualityChecker } from '../../components/FruitQualityChecker';
 import { apiService, AuthUser, ProductItem, OrderItem } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
 
@@ -160,7 +159,7 @@ export const FarmerDashboardView: React.FC<FarmerDashboardViewProps> = ({
         />
       </div>
 
-      {/* 8 Section Navigation Tabs */}
+      {/* 7 Section Navigation Tabs */}
       <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none">
         {[
           { id: 'products', label: '1. My Products', icon: Sprout },
@@ -169,8 +168,7 @@ export const FarmerDashboardView: React.FC<FarmerDashboardViewProps> = ({
           { id: 'analytics', label: '4. Sales Analytics', icon: BarChart3 },
           { id: 'mandi', label: '5. Market Prices', icon: TrendingUp },
           { id: 'ai-forecast', label: '6. AI Demand Forecast', icon: Zap },
-          { id: 'quality', label: '7. AI Quality Check', icon: ShieldCheck },
-          { id: 'earnings', label: '8. Earnings', icon: DollarSign },
+          { id: 'earnings', label: '7. Earnings', icon: DollarSign },
         ].map((sec) => {
           const isActive = activeSection === sec.id;
           const Icon = sec.icon;
@@ -277,12 +275,6 @@ export const FarmerDashboardView: React.FC<FarmerDashboardViewProps> = ({
       {/* SECTION 6: AI DEMAND FORECAST */}
       {activeSection === 'ai-forecast' && (
         <AIDemandForecastSection district={user.district} state={user.state} />
-      )}
-
-      {activeSection === 'quality' && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <FruitQualityChecker />
-        </div>
       )}
 
       {activeSection === 'earnings' && (

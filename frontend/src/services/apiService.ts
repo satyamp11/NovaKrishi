@@ -1,4 +1,4 @@
-import type { MarketRate, FruitQualityPrediction } from '../types';
+import type { MarketRate } from '../types';
 export type { MarketRate };
 import { MOCK_MARKET_RATES, ALL_INDIAN_STATES } from '../mockData';
 
@@ -67,7 +67,6 @@ export type ExtendedPaymentState =
   | 'REFUND_PENDING'
   | 'REFUNDED'
   | 'FAILED';
-
 
 export type DeliveryStatus =
   | 'ASSIGNED'
@@ -1538,47 +1537,5 @@ export const apiService = {
     } catch (e: any) {
       return { success: false, message: e.message };
     }
-  },
-
-  // --- Quality Classification ---
-  
-  async checkQualityServiceHealth(): Promise<{ healthy: boolean; message?: string; apiUrl?: string; checkedAt?: string }> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/quality/health`);
-      if (!response.ok) return { healthy: false };
-      const data = await response.json();
-      return data.qualityService || { healthy: false };
-    } catch (err) {
-      console.error('Failed to check quality service health:', err);
-      return { healthy: false, message: 'Network error' };
-    }
-  },
-
-  async classifyFruitImage(file: File): Promise<FruitQualityPrediction> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/quality/classify`, {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
-
-    const data = await response.json();
-    
-    if (!response.ok) {
-      const error = new Error(data.message || 'Failed to classify image');
-      (error as any).code = data.errorCode || 'UNKNOWN_ERROR';
-      (error as any).retryable = data.retryable || false;
-      throw error;
-    }
-    
-    return data.prediction;
   }
 };

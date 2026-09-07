@@ -1,45 +1,45 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, X, AlertTriangle, RefreshCw, Loader2, Info, CheckCircle2, XCircle, Leaf } from 'lucide-react';
-import { Button, Card, Badge } from './ui';
-import { useLanguage } from '../context/LanguageContext';
-import { translations } from '../translations';
 import { apiService } from '../services/apiService';
 import type { FruitQualityPrediction } from '../types';
 
-// ─── Quality colour config based on confirmed "Good" | "Bad" | "Average" values ─
+// ─── Quality colour config ────────────────────────────────────────────────────
 
 const QUALITY_CONFIG: Record<string, {
-  bg: string; border: string; text: string; badge: string; icon: React.ReactNode; label: string;
+  bg: string; border: string; text: string; badgeCls: string; icon: React.ReactNode; label: string;
 }> = {
   Good: {
-    bg:     'bg-emerald-50',
-    border: 'border-emerald-300',
-    text:   'text-emerald-800',
-    badge:  'bg-emerald-100 text-emerald-800 border border-emerald-300',
-    icon:   <CheckCircle2 className="w-6 h-6 text-emerald-500" />,
-    label:  'Good Quality',
+    bg:       'bg-emerald-50',
+    border:   'border-emerald-300',
+    text:     'text-emerald-800',
+    badgeCls: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+    icon:     <CheckCircle2 className="w-6 h-6 text-emerald-500" />,
+    label:    'Good Quality',
   },
   Bad: {
-    bg:     'bg-red-50',
-    border: 'border-red-300',
-    text:   'text-red-800',
-    badge:  'bg-red-100 text-red-800 border border-red-300',
-    icon:   <XCircle className="w-6 h-6 text-red-500" />,
-    label:  'Poor Quality',
+    bg:       'bg-red-50',
+    border:   'border-red-300',
+    text:     'text-red-800',
+    badgeCls: 'bg-red-100 text-red-800 border border-red-300',
+    icon:     <XCircle className="w-6 h-6 text-red-500" />,
+    label:    'Poor Quality',
   },
   Average: {
-    bg:     'bg-amber-50',
-    border: 'border-amber-300',
-    text:   'text-amber-800',
-    badge:  'bg-amber-100 text-amber-800 border border-amber-300',
-    icon:   <Info className="w-6 h-6 text-amber-500" />,
-    label:  'Average Quality',
+    bg:       'bg-amber-50',
+    border:   'border-amber-300',
+    text:     'text-amber-800',
+    badgeCls: 'bg-amber-100 text-amber-800 border border-amber-300',
+    icon:     <Info className="w-6 h-6 text-amber-500" />,
+    label:    'Average Quality',
   },
 };
-const DEFAULT_CONFIG = QUALITY_CONFIG['Average'];
+const DEFAULT_CFG = QUALITY_CONFIG['Average'];
 
 // ─── Confidence Bar ───────────────────────────────────────────────────────────
-function ConfidenceBar({ label, value, color }: { label: string; value: number; color: string }) {
+
+function ConfidenceBar({
+  label, value, barColor
+}: { label: string; value: number; barColor: string }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-1">
@@ -48,7 +48,7 @@ function ConfidenceBar({ label, value, color }: { label: string; value: number; 
       </div>
       <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${color}`}
+          className={`h-full rounded-full transition-all duration-700 ${barColor}`}
           style={{ width: `${Math.min(value, 100)}%` }}
         />
       </div>
@@ -57,12 +57,21 @@ function ConfidenceBar({ label, value, color }: { label: string; value: number; 
 }
 
 // ─── Result Card ──────────────────────────────────────────────────────────────
+
 function ResultCard({ result }: { result: FruitQualityPrediction }) {
-  const cfg = QUALITY_CONFIG[result.quality] ?? DEFAULT_CONFIG;
+  const cfg = QUALITY_CONFIG[result.quality] ?? DEFAULT_CFG;
+  const productBarColor =
+    result.product_confidence >= 80 ? 'bg-emerald-500'
+    : result.product_confidence >= 50 ? 'bg-amber-400'
+    : 'bg-red-400';
+  const qualityBarColor =
+    result.quality === 'Good' ? 'bg-emerald-500'
+    : result.quality === 'Bad' ? 'bg-red-400'
+    : 'bg-amber-400';
 
   return (
-    <div className={`rounded-2xl border-2 ${cfg.border} ${cfg.bg} p-5 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}>
-      {/* Header row */}
+    <div className={`rounded-2xl border-2 ${cfg.border} ${cfg.bg} p-5 space-y-4`}>
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {cfg.icon}
@@ -71,26 +80,17 @@ function ResultCard({ result }: { result: FruitQualityPrediction }) {
             <h3 className="text-2xl font-black text-gray-900 leading-tight">{result.product}</h3>
           </div>
         </div>
-        <span className={`px-3 py-1.5 rounded-full text-sm font-bold ${cfg.badge}`}>
+        <span className={`px-3 py-1.5 rounded-full text-sm font-bold ${cfg.badgeCls}`}>
           {cfg.label}
         </span>
       </div>
 
-      {/* Divider */}
-      <hr className={`border-0 h-px ${cfg.bg.replace('bg-', 'bg-').replace('50', '200')}`} />
+      <hr className="border-gray-200" />
 
-      {/* Confidence bars */}
+      {/* Confidence Bars */}
       <div className="space-y-3">
-        <ConfidenceBar
-          label="Product Confidence"
-          value={result.product_confidence}
-          color={result.product_confidence >= 80 ? 'bg-emerald-500' : result.product_confidence >= 50 ? 'bg-amber-400' : 'bg-red-400'}
-        />
-        <ConfidenceBar
-          label="Quality Confidence"
-          value={result.quality_confidence}
-          color={result.quality === 'Good' ? 'bg-emerald-500' : result.quality === 'Bad' ? 'bg-red-400' : 'bg-amber-400'}
-        />
+        <ConfidenceBar label="Product Confidence" value={result.product_confidence} barColor={productBarColor} />
+        <ConfidenceBar label="Quality Confidence" value={result.quality_confidence} barColor={qualityBarColor} />
       </div>
 
       {/* Advisory */}
@@ -99,37 +99,32 @@ function ResultCard({ result }: { result: FruitQualityPrediction }) {
           ? `✅ This ${result.product} is classified as fresh and market-ready with ${result.quality_confidence.toFixed(0)}% confidence.`
           : result.quality === 'Bad'
           ? `⚠️ This ${result.product} shows signs of poor quality. Consider re-inspection before listing on marketplace.`
-          : `ℹ️ This ${result.product} is of average quality. Manual inspection recommended before pricing.`
-        }
+          : `ℹ️ This ${result.product} is of average quality. Manual inspection recommended before pricing.`}
       </div>
     </div>
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+
 export const FruitQualityChecker: React.FC = () => {
-  const { language } = useLanguage();
-  const t = translations[language];
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [serviceDown, setServiceDown] = useState(false);
-  const [result, setResult] = useState<FruitQualityPrediction | null>(null);
-  const [error, setError] = useState<{ message: string; retryable: boolean } | null>(null);
 
-  // Proactively ping health on mount
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl,    setPreviewUrl]    = useState<string | null>(null);
+  const [loading,       setLoading]       = useState(false);
+  const [serviceDown,   setServiceDown]   = useState(false);
+  const [result,        setResult]        = useState<FruitQualityPrediction | null>(null);
+  const [error,         setError]         = useState<{ message: string; retryable: boolean } | null>(null);
+
+  // Proactive health check on mount
   useEffect(() => {
     apiService.checkQualityServiceHealth().then(({ healthy }) => {
       if (!healthy) setServiceDown(true);
     });
   }, []);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImageSelect = (file: File) => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setError({ message: 'Please upload a valid image (JPEG, PNG, or WebP).', retryable: false });
@@ -139,20 +134,21 @@ export const FruitQualityChecker: React.FC = () => {
       setError({ message: 'File is too large (max 8MB).', retryable: false });
       return;
     }
-
     setSelectedImage(file);
     setPreviewUrl(URL.createObjectURL(file));
     setResult(null);
     setError(null);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageSelect(file);
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file) {
-      const fakeEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-      handleImageSelect(fakeEvent);
-    }
+    if (file) handleImageSelect(file);
   };
 
   const clearSelection = () => {
@@ -168,12 +164,13 @@ export const FruitQualityChecker: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const prediction: FruitQualityPrediction = await apiService.classifyFruitImage(selectedImage);
+      const prediction = await apiService.classifyFruitImage(selectedImage);
       setResult(prediction);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const e = err as { message?: string; retryable?: boolean };
       setError({
-        message: err.message || t.qualityCheckUnavailable,
-        retryable: err.retryable ?? false
+        message:   e.message   ?? 'Quality check unavailable, please try again.',
+        retryable: e.retryable ?? false
       });
     } finally {
       setLoading(false);
@@ -188,14 +185,14 @@ export const FruitQualityChecker: React.FC = () => {
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
             <Leaf className="w-5 h-5 text-white" />
           </div>
-          <h2 className="text-xl font-black">{t.qualityCheckerTitle || 'AI Fruit Quality Check'}</h2>
+          <h2 className="text-xl font-black">AI Fruit Quality Check</h2>
         </div>
         <p className="text-sm text-emerald-100 leading-relaxed">
           Upload a photo of your produce to instantly detect the fruit type and grade its quality using computer vision.
         </p>
       </div>
 
-      {/* Service down banner */}
+      {/* Service waking-up banner */}
       {serviceDown && (
         <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 p-3.5 rounded-xl flex gap-2.5 text-sm">
           <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -207,19 +204,19 @@ export const FruitQualityChecker: React.FC = () => {
       {!selectedImage && (
         <div
           onClick={() => fileInputRef.current?.click()}
-          onDrop={handleDrop}
+          onDrop={onDrop}
           onDragOver={(e) => e.preventDefault()}
           className="border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/40 transition-all group"
         >
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
             <Upload className="w-8 h-8 text-emerald-600" />
           </div>
-          <p className="text-base font-semibold text-gray-800">{t.uploadFruitPhoto || 'Upload Fruit Photo'}</p>
-          <p className="text-sm text-gray-500 mt-1">Drag & drop or click to browse — JPEG, PNG, WebP (max 8MB)</p>
+          <p className="text-base font-semibold text-gray-800">Upload Fruit Photo</p>
+          <p className="text-sm text-gray-500 mt-1">Drag & drop or click — JPEG, PNG, WebP (max 8MB)</p>
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleImageSelect}
+            onChange={onFileInputChange}
             accept="image/jpeg,image/jpg,image/png,image/webp"
             className="hidden"
           />
@@ -248,7 +245,7 @@ export const FruitQualityChecker: React.FC = () => {
               <div>
                 <p className="font-semibold">{error.message}</p>
                 {error.retryable && (
-                  <p className="mt-1 opacity-80">{t.qualityCheckUnavailableHint || 'Please wait ~30s and try again.'}</p>
+                  <p className="mt-1 opacity-80">The AI service is waking up. Please wait ~30s and try again.</p>
                 )}
               </div>
             </div>
@@ -264,7 +261,7 @@ export const FruitQualityChecker: React.FC = () => {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  {t.checkingQuality || 'Analyzing Quality...'}
+                  Analyzing Quality...
                 </>
               ) : (
                 <>
@@ -275,7 +272,7 @@ export const FruitQualityChecker: React.FC = () => {
             </button>
           )}
 
-          {/* ✅ Result */}
+          {/* Result */}
           {result && (
             <>
               <ResultCard result={result} />

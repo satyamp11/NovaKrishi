@@ -22,7 +22,6 @@ import bulkRequestRouter from './routes/bulkRequest.routes.js';
 import adminRouter from './routes/admin.routes.js';
 import reviewRouter from './routes/reviewRoutes.js';
 import disputeRouter from './routes/disputeRoutes.js';
-import qualityRouter from './routes/quality.routes.js';
 import { deliveryController } from './controllers/deliveryController.js';
 
 export const app = express();
@@ -63,7 +62,6 @@ app.use('/api/mandi', mandiRouter);
 app.use('/api/market-rates', marketRatesRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/disease-scan', diseaseRouter);
-app.use('/api/quality', qualityRouter);
 
 // Centralized Error Handler
 app.use(errorHandler);

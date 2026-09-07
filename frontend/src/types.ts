@@ -164,27 +164,3 @@ export interface Dispute {
   resolvedAt?: string;
 }
 
-// ─── Fruit Quality Classification ML API ──────────────────────────────────────
-// Response shape confirmed by live smoke test on 2026-09-07:
-// POST https://fruit-classification-way1.onrender.com/predict → HTTP 200
-// {"success":true,"message":"Prediction successful","filename":"test_apple.png",
-//  "product":"Apple","product_confidence":95.36,"quality":"Good","quality_confidence":99.97}
-
-export type FruitQualityGrade = 'Good' | 'Bad' | 'Average';
-
-export interface FruitQualityPrediction {
-  /** Whether the prediction succeeded */
-  success: boolean;
-  /** Human-readable status message from the ML API */
-  message: string;
-  /** Filename that was processed */
-  filename: string;
-  /** Detected fruit/product name e.g. "Apple", "Mango", "Banana" */
-  product: string;
-  /** Confidence for the product classification, 0–100 (e.g. 95.36 means 95.36%) */
-  product_confidence: number;
-  /** Quality grade: "Good" | "Bad" | "Average" */
-  quality: FruitQualityGrade | string;
-  /** Confidence for the quality grade, 0–100 (e.g. 99.97 means 99.97%) */
-  quality_confidence: number;
-}
