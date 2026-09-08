@@ -1729,5 +1729,82 @@ export const apiService = {
     }
     
     return data.prediction;
+  },
+
+  // --- AI Fair Price Forecast ---
+  async getPriceForecastStates(): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/states`);
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getPriceForecastDistricts(state: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/districts?state=${encodeURIComponent(state)}`);
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getPriceForecastCommodities(state: string, district: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/commodities?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}`);
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getPriceForecastVarieties(state: string, district: string, commodity: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/varieties?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}&commodity=${encodeURIComponent(commodity)}`);
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getPriceForecastGrades(state: string, district: string, commodity: string, variety: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/grades?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}&commodity=${encodeURIComponent(commodity)}&variety=${encodeURIComponent(variety)}`);
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async getPriceForecastMonths(): Promise<{ success: boolean; data?: number[]; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/months`);
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  async predictFairPrice(payload: {
+    state: string;
+    district: string;
+    commodity: string;
+    variety: string;
+    grade: string;
+    arrivalMonth: number;
+  }): Promise<{ success: boolean; data?: any; message?: string; code?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/price-forecast/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      return await response.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
   }
 };
