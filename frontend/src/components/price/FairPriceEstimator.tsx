@@ -231,7 +231,7 @@ export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language
       {isLoadingList && (
         <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Loading dependencies...
+          Loading regions from ML API...
         </div>
       )}
 

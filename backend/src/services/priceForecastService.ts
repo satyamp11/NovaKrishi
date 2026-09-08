@@ -78,21 +78,28 @@ async function fetchFromApi<T>(endpoint: string, queryParams: Record<string, any
   }
 
   const abort = new AbortController();
-  const timeout = setTimeout(() => abort.abort(), timeoutMs);
+
+  const fetchPromise = fetch(urlString, { signal: abort.signal })
+    .then(async (res) => {
+      if (!res.ok) {
+        const errorBody = await res.text().catch(() => '');
+        if (res.status === 422) {
+          throw new PriceForecastServiceError(`Validation error: ${errorBody}`, 'VALIDATION_ERROR');
+        }
+        throw new PriceForecastServiceError(`API returned error ${res.status}: ${errorBody}`, 'API_ERROR');
+      }
+      return res.json();
+    });
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      abort.abort(); // Attempt to clean up underlying socket
+      reject(new PriceForecastServiceError(`API timed out after ${timeoutMs}ms`, 'TIMEOUT'));
+    }, timeoutMs);
+  });
 
   try {
-    const res = await fetch(urlString, { signal: abort.signal });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => '');
-      if (res.status === 422) {
-        throw new PriceForecastServiceError(`Validation error: ${errorBody}`, 'VALIDATION_ERROR');
-      }
-      throw new PriceForecastServiceError(`API returned error ${res.status}: ${errorBody}`, 'API_ERROR');
-    }
-
-    const data = await res.json();
+    const data = await Promise.race([fetchPromise, timeoutPromise]);
     
     if (useCache) {
       cacheMap.set(urlString, { timestamp: Date.now(), data });
@@ -100,11 +107,21 @@ async function fetchFromApi<T>(endpoint: string, queryParams: Record<string, any
     
     return data;
   } catch (err: any) {
-    clearTimeout(timeout);
-    if (err instanceof PriceForecastServiceError) throw err;
+    if (err instanceof PriceForecastServiceError) {
+      if (err.code === 'TIMEOUT') {
+        console.warn(`⚠️ [PriceForecast] ${err.message} on endpoint ${endpoint}`);
+      } else {
+        console.error(`❌ [PriceForecast] Error on endpoint ${endpoint}:`, err.message);
+      }
+      throw err;
+    }
+    
     if (err.name === 'AbortError') {
+      console.warn(`⚠️ [PriceForecast] Request aborted (likely timeout) on endpoint ${endpoint}`);
       throw new PriceForecastServiceError(`API timed out after ${timeoutMs}ms`, 'TIMEOUT');
     }
+    
+    console.error(`❌ [PriceForecast] Failed to reach API on ${endpoint}:`, err.message);
     throw new PriceForecastServiceError(`Failed to reach API: ${err.message}`, 'SERVICE_UNAVAILABLE');
   }
 }
