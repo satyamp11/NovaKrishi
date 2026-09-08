@@ -13,15 +13,16 @@ export const qualityController = {
 
   classifyImage: async (req: Request, res: Response): Promise<void> => {
     try {
-      if (!req.file) {
+      const uploadedFile = (req as any).file;
+      if (!uploadedFile) {
         res.status(400).json({ success: false, message: 'No image file uploaded' });
         return;
       }
 
       const prediction = await fruitQualityService.classifyFruitImage(
-        req.file.buffer,
-        req.file.originalname,
-        req.file.mimetype
+        uploadedFile.buffer,
+        uploadedFile.originalname,
+        uploadedFile.mimetype
       );
 
       res.status(200).json({ success: true, prediction });
