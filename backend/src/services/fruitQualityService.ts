@@ -94,7 +94,7 @@ export const fruitQualityService = {
 
     try {
       const formData = new FormData();
-      const blob = new Blob([fileBuffer as any], { type: mimetype });
+      const blob = new Blob([new Uint8Array(fileBuffer)], { type: mimetype });
       formData.append('file', blob, filename);
 
       const res = await fetch(`${BASE_URL}/predict`, {
