@@ -174,7 +174,7 @@ export const MarketRatesSection: React.FC<MarketRatesProps> = ({ language }) => 
           <div>
             <div className="flex items-center gap-2 text-xs font-black text-emerald-800 uppercase tracking-wider mb-1">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <span>{language === 'hi' ? 'लाइव मंडी भाव बेंचमार्क' : 'LIVE MANDI BENCHMARKS'}</span>
+              <span>{language === 'hi' ? 'रिकॉर्डेड मंडी भाव बेंचमार्क' : 'RECORDED MANDI BENCHMARKS'}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#143022] font-sans tracking-tight">
               {language === 'hi' ? 'मंडी को जानें। सही दाम पर बेचें।' : 'Know the Market. Sell Smarter.'}
@@ -216,7 +216,7 @@ export const MarketRatesSection: React.FC<MarketRatesProps> = ({ language }) => 
                 : '💡 Click any card below to view its 7-day price trajectory graph:'}
             </span>
             <span className="text-[11px] text-emerald-800 font-bold bg-emerald-100/60 px-2 py-0.5 rounded-md">
-              {displayRates.length} {language === 'hi' ? 'मंडी भाव उपलब्ध' : 'Live Feeds'}
+              {displayRates.length} {language === 'hi' ? 'मंडी भाव उपलब्ध' : 'Recorded Feeds'}
             </span>
           </div>
 

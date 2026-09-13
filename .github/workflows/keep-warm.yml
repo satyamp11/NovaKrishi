@@ -1,0 +1,30 @@
+name: Keep Render Services Warm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes
+  workflow_dispatch: {}       # allows manual "Run workflow" trigger for testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping ML price-prediction API
+        run: |
+          echo "Pinging price-prediction-nolh.onrender.com..."
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+            "https://price-prediction-nolh.onrender.com/states")
+          echo "Response status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::warning::ML API returned non-200 status: $status"
+          fi
+
+      - name: Ping Node backend
+        run: |
+          echo "Pinging novakrishi.onrender.com..."
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+            "https://novakrishi.onrender.com/api/price-forecast/months")
+          echo "Response status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::warning::Node backend returned non-200 status: $status"
+          fi

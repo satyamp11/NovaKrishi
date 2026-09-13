@@ -66,7 +66,7 @@ export const KrishiLandingPage: React.FC<KrishiLandingPageProps> = ({
         onAddToCart={() => onLaunchApp()}
       />
 
-      {/* 5. LIVE MARKET PRICES ("Know the Market. Sell Smarter.") */}
+      {/* 5. RECORDED MARKET PRICES ("Know the Market. Sell Smarter.") */}
       <MarketRatesSection language={language} />
 
       {/* 6. AI INSIGHTS SECTION ("AI That Helps Farmers Decide Better.") */}
