@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sprout, Phone, Mail, MapPin, Globe, ShieldCheck } from 'lucide-react';
+import { Phone, Mail, MapPin, ShieldCheck } from 'lucide-react';
 import type { Language } from '../../types';
 import logoImg from '../../assets/NovaKrishi.jpeg';
 

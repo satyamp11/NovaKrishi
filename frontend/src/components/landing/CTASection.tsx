@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sprout, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { Language } from '../../types';
 import logoImg from '../../assets/NovaKrishi.jpeg';
 
