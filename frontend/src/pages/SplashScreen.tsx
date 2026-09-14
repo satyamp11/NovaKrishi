@@ -30,7 +30,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
             src="/logo.png" 
             alt="NovaKrishi Logo" 
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            className="w-36 h-36 object-contain rounded-3xl shadow-2xl ring-4 ring-[#e8f5e9]"
+            className="w-36 h-36 object-cover rounded-full shadow-2xl ring-4 ring-[#e8f5e9] border-2 border-emerald-600/30"
           />
           <div className="absolute -bottom-2 -right-2 bg-amber-500 text-slate-950 p-2 rounded-xl shadow-lg animate-bounce">
             <Sparkles className="w-5 h-5" />

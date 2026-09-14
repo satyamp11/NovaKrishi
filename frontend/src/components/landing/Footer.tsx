@@ -20,9 +20,11 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-800 flex items-center justify-center text-white border border-emerald-700">
-                <Sprout className="w-6 h-6 text-emerald-300" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="NovaKrishi Logo" 
+                className="w-10 h-10 rounded-full object-cover bg-white shadow-md border border-emerald-600/30" 
+              />
               <span className="text-2xl font-black font-serif tracking-tight text-white">
                 Nova<span className="text-emerald-400 font-sans">Krishi</span>
               </span>

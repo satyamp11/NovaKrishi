@@ -64,7 +64,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             src={logoImg} 
             alt="NovaKrishi" 
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            className="h-8 sm:h-12 w-auto object-contain rounded-xl shadow-sm group-hover:scale-105 transition-transform shrink-0" 
+            className="h-9 w-9 sm:h-11 sm:w-11 object-cover rounded-full shadow-md group-hover:scale-105 transition-transform shrink-0 border border-emerald-600/30" 
           />
           <div className="min-w-0">
             <h1 className="font-serif-title font-extrabold text-lg sm:text-2xl text-[#1b4332] leading-none tracking-tight flex items-center gap-1 sm:gap-1.5">

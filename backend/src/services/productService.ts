@@ -28,6 +28,20 @@ export interface PaginatedProductsResponse {
 export const productService = {
   // Convert Mongoose Doc to Clean API Response
   toProductResponse(doc: IProduct): ProductResponse {
+    let resolvedImageUrl = doc.imageUrl || '/images/wheat.jpg';
+    if (doc.title.toLowerCase().includes('ghee')) {
+      resolvedImageUrl = '/images/ghee.jpg';
+    } else if (
+      doc.title.toLowerCase().includes('wheat') ||
+      resolvedImageUrl.toLowerCase().includes('certificate') ||
+      resolvedImageUrl.toLowerCase().includes('yhills') ||
+      resolvedImageUrl.toLowerCase().includes('completion') ||
+      resolvedImageUrl.toLowerCase().includes('award') ||
+      resolvedImageUrl.toLowerCase().includes('internship')
+    ) {
+      resolvedImageUrl = '/images/wheat.jpg';
+    }
+
     return {
       id: doc._id.toString(),
       title: doc.title,
@@ -38,7 +52,7 @@ export const productService = {
       availableQuantity: doc.availableQuantity,
       minOrderQuantity: doc.minOrderQuantity || 1,
       description: doc.description || '',
-      imageUrl: doc.imageUrl,
+      imageUrl: resolvedImageUrl,
       farmerId: doc.farmerId ? doc.farmerId.toString() : '',
       farmerName: doc.farmerName,
       fpoName: doc.fpoName || '',
@@ -60,6 +74,24 @@ export const productService = {
   // 1. Get All Filtered Marketplace Products
   async getProducts(filter: ProductQueryFilter): Promise<PaginatedProductsResponse> {
     await this.seedInitialProducts(); // Auto-seed if empty
+
+    try {
+      await Product.updateMany(
+        { title: { $regex: 'ghee', $options: 'i' } },
+        { $set: { imageUrl: '/images/ghee.jpg' } }
+      );
+      await Product.updateMany(
+        {
+          $or: [
+            { title: { $regex: 'wheat', $options: 'i' } },
+            { imageUrl: { $regex: 'certificate|yhills|completion|award|internship', $options: 'i' } }
+          ]
+        },
+        { $set: { imageUrl: '/images/wheat.jpg' } }
+      );
+    } catch (e) {
+      // Ignore if DB is disconnected
+    }
 
     const query: any = { status: { $ne: 'unlisted' } };
 
@@ -275,7 +307,7 @@ export const productService = {
           availableQuantity: 250,
           minOrderQuantity: 10,
           description: 'Golden Sharbati wheat grains grown naturally without synthetic chemical fertilizers.',
-          imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=500&q=80',
+          imageUrl: '/images/wheat.jpg',
           farmerId: dummyFarmerId,
           farmerName: 'Gorakhpur Kisan FPO',
           fpoName: 'Gorakhpur Farmers Producer Co.',
@@ -335,7 +367,7 @@ export const productService = {
           availableQuantity: 50,
           minOrderQuantity: 1,
           description: 'Traditional Vedic Bilona method Ghee prepared from free-grazing Gir Cows.',
-          imageUrl: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=500&q=80',
+          imageUrl: '/images/ghee.jpg',
           farmerId: dummyFarmerId,
           farmerName: 'Vedic Gaushala Dairy',
           fpoName: 'Gir Krishi Gaushala',

@@ -85,9 +85,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Logo Section */}
           <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none" onClick={() => handleNavClick('landing')}>
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#1b4332] flex items-center justify-center text-white shadow-xs border border-emerald-800 shrink-0">
-              <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="NovaKrishi Logo" 
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full shadow-md shrink-0 object-cover border border-emerald-600/30" 
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xl sm:text-2xl font-black font-brand tracking-tight text-[#1b4332]">
