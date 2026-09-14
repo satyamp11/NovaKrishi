@@ -184,6 +184,7 @@ export const DISEASE_DATABASE: Record<string, DiseaseInfo> = {
 export const INITIAL_CLUSTERS: OutbreakCluster[] = [
   {
     id: "cluster-1",
+    type: "disease",
     diseaseName: "Tomato Early Blight",
     diseaseHindi: "टमाटर अगेती झुलसा",
     crop: "Tomato",
@@ -206,6 +207,7 @@ export const INITIAL_CLUSTERS: OutbreakCluster[] = [
   },
   {
     id: "cluster-2",
+    type: "disease",
     diseaseName: "Yellow Rust of Wheat",
     diseaseHindi: "गेहूं का पीला रतुआ",
     crop: "Wheat",

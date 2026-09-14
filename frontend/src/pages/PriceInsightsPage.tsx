@@ -289,7 +289,7 @@ export const PriceInsightsPage: React.FC<PriceInsightsPageProps> = ({
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-emerald-700" />
               <h2 className="text-xl font-black text-slate-900">
-                Live Mandi Benchmarks ({rates.length} Rates Found)
+                Recorded Mandi Benchmarks ({rates.length} Rates Found)
               </h2>
             </div>
             <span className="text-xs text-slate-500 font-semibold">

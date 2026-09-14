@@ -1,6 +1,7 @@
 import React from 'react';
-import { Sprout, Phone, Mail, MapPin, Globe, ShieldCheck } from 'lucide-react';
+import { Phone, Mail, MapPin, ShieldCheck } from 'lucide-react';
 import type { Language } from '../../types';
+import logoImg from '../../assets/NovaKrishi.jpeg';
 
 interface FooterProps {
   language?: Language;
@@ -20,9 +21,11 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-800 flex items-center justify-center text-white border border-emerald-700">
-                <Sprout className="w-6 h-6 text-emerald-300" />
-              </div>
+              <img 
+                src={logoImg} 
+                alt="NovaKrishi" 
+                className="w-10 h-10 rounded-2xl shadow-xs shrink-0 object-contain bg-white" 
+              />
               <span className="text-2xl font-black font-serif tracking-tight text-white">
                 Nova<span className="text-emerald-400 font-sans">Krishi</span>
               </span>

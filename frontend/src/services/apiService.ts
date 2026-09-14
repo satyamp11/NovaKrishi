@@ -542,22 +542,8 @@ export interface CropScanRecord {
   createdAt: string;
 }
 
-export interface CommunityAlertRecord {
-  id: string;
-  diseaseName: string;
-  diseaseHindi: string;
-  crop: string;
-  state: string;
-  district: string;
-  centerVillage: string;
-  severity: 'Critical' | 'Warning' | 'Low';
-  reportCount: number;
-  description: string;
-  descriptionHindi: string;
-  recommendations: string[];
-  recommendationsHindi: string[];
-  createdAt: string;
-}
+import { OutbreakCluster } from '../types';
+export type CommunityAlertRecord = OutbreakCluster;
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('krishi_shield_auth_token');
