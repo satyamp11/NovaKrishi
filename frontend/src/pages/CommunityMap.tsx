@@ -23,14 +23,14 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
   const t = translations[language];
   const [diseaseFilter, setDiseaseFilter] = useState<string>('all');
 
-  const filteredClusters = clusters.filter(c => {
+  const filteredClusters = clusters.filter((c): c is Extract<OutbreakCluster, { type: 'disease' }> => c.type === 'disease').filter(c => {
     if (diseaseFilter !== 'all' && !c.diseaseName.toLowerCase().includes(diseaseFilter.toLowerCase())) {
       return false;
     }
     return true;
   });
 
-  const [selectedCluster, setSelectedCluster] = useState<OutbreakCluster | null>(filteredClusters[0] || null);
+  const [selectedCluster, setSelectedCluster] = useState<Extract<OutbreakCluster, { type: 'disease' }> | null>(filteredClusters[0] || null);
 
   return (
     <div className={`w-full min-h-screen transition-colors ${
@@ -197,7 +197,7 @@ export const CommunityMap: React.FC<CommunityMapProps> = ({
                     <span>Recommended Preventive Protocol</span>
                   </h4>
                   <ul className="text-xs text-slate-700 space-y-1 pl-6 list-disc font-medium">
-                    {(language === 'hi' ? selectedCluster.recommendationsHindi : selectedCluster.recommendations).map((rec, i) => (
+                    {(language === 'hi' ? selectedCluster.recommendationsHindi : selectedCluster.recommendations).map((rec: string, i: number) => (
                       <li key={i}>{rec}</li>
                     ))}
                   </ul>
