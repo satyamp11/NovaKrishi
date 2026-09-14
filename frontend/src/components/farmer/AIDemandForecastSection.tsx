@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, TrendingUp, AlertTriangle, ShieldCheck, RefreshCw, Cpu, ChevronRight } from 'lucide-react';
+import { Sparkles, AlertTriangle, RefreshCw, Cpu, ChevronRight } from 'lucide-react';
 import { Badge, Button, LoadingState, ErrorState } from '../ui';
 import { apiService, CropForecastItem } from '../../services/apiService';
 
@@ -172,7 +172,13 @@ export const AIDemandForecastSection: React.FC<{ district?: string; state?: stri
                 </p>
               </div>
 
-              {/* Historical vs Forecasted Demand SVG Chart */}
+              {/* Historical vs Forecasted Demand SVG Chart — CSS LAYOUT FIX:
+                  Bars use percentage heights. For % height to resolve to real px,
+                  every ancestor in the flex column must have a DEFINITE height.
+                  The chart container is h-44. Each column is `flex flex-col h-full`.
+                  The bar sits inside a `flex-1` track div (items-end so bar grows
+                  from the bottom). Without the track wrapper the column itself had
+                  no definite height and `height: 60%` collapsed to 0px. */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-black uppercase tracking-wider text-slate-600">
@@ -188,39 +194,48 @@ export const AIDemandForecastSection: React.FC<{ district?: string; state?: stri
                   </div>
                 </div>
 
-                {/* SVG Visual Bar Chart */}
-                <div className="h-44 w-full bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-end justify-between gap-1.5">
+                {/* Chart container: fixed height so child % heights resolve correctly */}
+                <div className="h-44 w-full bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-stretch justify-between gap-1.5">
                   {/* Historical Bars */}
                   {activeForecast.historicalDemandSeries.map((h) => {
                     const heightPercent = Math.min(100, Math.max(15, (h.demandQty / 350) * 100));
                     return (
-                      <div key={h.date} className="flex-1 flex flex-col items-center gap-1 group">
+                      <div key={h.date} className="flex-1 h-full flex flex-col items-center gap-1 group">
                         <span className="text-[9px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
                           {h.demandQty}Q
                         </span>
-                        <div
-                          className="w-full bg-slate-300 group-hover:bg-slate-400 rounded-t-md transition-all"
-                          style={{ height: `${heightPercent}%` }}
-                        />
+                        {/* Track: fills remaining vertical space so the bar's
+                            percentage height has a real, definite parent to
+                            resolve against (without this, the bar collapses
+                            to 0px). */}
+                        <div className="w-full flex-1 flex items-end">
+                          <div
+                            className="w-full bg-slate-300 group-hover:bg-slate-400 rounded-t-md transition-all"
+                            style={{ height: `${heightPercent}%` }}
+                          />
+                        </div>
                         <span className="text-[9px] font-bold text-slate-400 truncate">{h.date}</span>
                       </div>
                     );
                   })}
 
-                  <div className="h-full w-0.5 bg-slate-300 mx-1" />
+                  {/* Vertical divider between historical and forecast */}
+                  <div className="h-full w-0.5 bg-slate-300 mx-1 shrink-0" />
 
                   {/* Forecasted Bars */}
                   {activeForecast.forecastedDemandSeries.map((f) => {
                     const heightPercent = Math.min(100, Math.max(15, (f.predictedQty / 350) * 100));
                     return (
-                      <div key={f.date} className="flex-1 flex flex-col items-center gap-1 group">
+                      <div key={f.date} className="flex-1 h-full flex flex-col items-center gap-1 group">
                         <span className="text-[9px] font-bold text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity">
                           {f.predictedQty}Q
                         </span>
-                        <div
-                          className="w-full bg-emerald-600 group-hover:bg-emerald-500 rounded-t-md transition-all shadow-xs"
-                          style={{ height: `${heightPercent}%` }}
-                        />
+                        <div className="w-full flex-1 flex items-end">
+                          <div
+                            className="w-full bg-emerald-600 group-hover:bg-emerald-500 rounded-t-md transition-all shadow-xs"
+                            style={{ height: `${heightPercent}%` }}
+                          />
+                        </div>
                         <span className="text-[9px] font-extrabold text-emerald-800 truncate">{f.date}</span>
                       </div>
                     );

@@ -125,7 +125,37 @@ export function AppContent() {
 
   const [weather] = useState<WeatherData>(INITIAL_WEATHER);
   const [riskLevel, setRiskLevel] = useState<RiskLevel>('warning');
-  const [clusters, setClusters] = useState<OutbreakCluster[]>(INITIAL_CLUSTERS);
+  const [clusters, setClusters] = useState<OutbreakCluster[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState<boolean>(true);
+  const [alertsError, setAlertsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      setAlertsLoading(true);
+      setAlertsError(null);
+      try {
+        const res = await apiService.getCommunityAlerts({
+          state: farmer.state,
+          district: farmer.district,
+          crop: farmer.mainCrops[0] || 'All'
+        });
+        if (res.success && res.alerts) {
+          setClusters(res.alerts);
+          setUnreadAlertsCount(res.alerts.length);
+        } else {
+          setClusters(INITIAL_CLUSTERS); // fallback
+          setAlertsError('Failed to fetch real-time alerts. Showing demo data.');
+        }
+      } catch (err) {
+        setClusters(INITIAL_CLUSTERS);
+        setAlertsError('Network error while fetching alerts.');
+      } finally {
+        setAlertsLoading(false);
+      }
+    };
+    fetchAlerts();
+  }, [farmer.state, farmer.district, farmer.mainCrops]);
+
   const [reports, setReports] = useState<OutbreakReport[]>(INITIAL_REPORTS);
   const [activities, setActivities] = useState<CommunityActivity[]>(COMMUNITY_ACTIVITIES);
   const [unreadAlertsCount, setUnreadAlertsCount] = useState<number>(2);
@@ -186,6 +216,7 @@ export function AppContent() {
 
     const newDemoCluster: OutbreakCluster = {
       id: `demo-cluster-${Date.now()}`,
+      type: 'disease',
       diseaseName: 'Tomato Early Blight',
       diseaseHindi: 'टमाटर अगेती झुलसा प्रकोप',
       crop: 'Tomato',
@@ -561,6 +592,8 @@ export function AppContent() {
           <AlertsScreen
             language={language}
             clusters={clusters}
+            loading={alertsLoading}
+            error={alertsError}
             onNavigateToScan={() => handleNavigateWithAuth('scan')}
             onNavigateToMap={() => handleNavigateWithAuth('map')}
             sunlightMode={sunlightMode}

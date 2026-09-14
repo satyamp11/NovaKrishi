@@ -26,6 +26,9 @@ export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language
   const [isPredicting, setIsPredicting] = useState(false);
   const [prediction, setPrediction] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isColdStart, setIsColdStart] = useState(false);
+
+  const COLD_START_CODES = ['SERVICE_UNAVAILABLE', 'TIMEOUT'];
 
   // Helper to fetch list and handle empty arrays
   const fetchList = async (
@@ -36,6 +39,7 @@ export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language
   ) => {
     setIsLoadingList(true);
     setError(null);
+    setIsColdStart(false);
     try {
       const res = await fetchFn();
       if (res.success && res.data) {
@@ -45,6 +49,9 @@ export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language
         } else {
           setList(res.data);
         }
+      } else if (res.code && COLD_START_CODES.includes(res.code)) {
+        setIsColdStart(true);
+        setError(`The ML service is waking up from sleep. This can take up to a minute on the first request — please wait and retry.`);
       } else {
         setError(res.message || 'Error fetching data');
       }
@@ -55,9 +62,13 @@ export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language
     }
   };
 
-  useEffect(() => {
+  const loadInitialLists = () => {
     fetchList(() => apiService.getPriceForecastStates(), setStates, setSelectedState, 'States');
     fetchList(() => apiService.getPriceForecastMonths(), setMonths, setSelectedMonth, 'Months');
+  };
+
+  useEffect(() => {
+    loadInitialLists();
   }, []);
 
   useEffect(() => {
@@ -238,7 +249,18 @@ export const FairPriceEstimator: React.FC<{ language?: Language }> = ({ language
       {error && !isLoadingList && (
         <div className="flex items-start gap-2 text-sm font-medium text-red-700 bg-red-50 p-4 rounded-xl border border-red-200">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-          <p>{error}</p>
+          <div className="flex-1">
+            <p>{error}</p>
+            {isColdStart && (
+              <button
+                type="button"
+                onClick={loadInitialLists}
+                className="mt-2 text-xs font-bold text-red-800 underline underline-offset-2 hover:text-red-900"
+              >
+                Retry now
+              </button>
+            )}
+          </div>
         </div>
       )}
 

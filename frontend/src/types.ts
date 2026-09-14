@@ -54,22 +54,49 @@ export interface OutbreakReport {
   status: 'verified' | 'pending';
 }
 
-export interface OutbreakCluster {
+export type AlertType = 'disease' | 'price' | 'weather';
+
+export interface BaseAlertRecord {
   id: string;
+  type: AlertType;
+  severity: Severity;
+  state?: string;
+  district?: string;
+  createdAt?: string;
+}
+
+export interface DiseaseAlertRecord extends BaseAlertRecord {
+  type: 'disease';
   diseaseName: string;
   diseaseHindi: string;
   crop: string;
-  cropHindi: string;
+  cropHindi?: string;
   centerVillage: string;
-  lat: number;
-  lng: number;
-  radiusKm: number;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
   reportCount: number;
-  severity: Severity;
   lastReportTime: string;
   recommendations: string[];
   recommendationsHindi: string[];
 }
+
+export interface PriceAlertRecord extends BaseAlertRecord {
+  type: 'price';
+  commodity: string;
+  direction: 'spike' | 'drop';
+  percentChange: number;
+  description: string;
+}
+
+export interface WeatherAlertRecord extends BaseAlertRecord {
+  type: 'weather';
+  condition: string;
+  description: string;
+  recommendation: string;
+}
+
+export type OutbreakCluster = DiseaseAlertRecord | PriceAlertRecord | WeatherAlertRecord;
 
 export interface WeatherData {
   temp: number;

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Sprout, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { Language } from '../../types';
+import logoImg from '../../assets/NovaKrishi.jpeg';
 
 interface CTASectionProps {
   language?: Language;
@@ -20,9 +21,11 @@ export const CTASection: React.FC<CTASectionProps> = ({
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
         
-        <div className="w-14 h-14 rounded-3xl bg-emerald-800 text-emerald-300 flex items-center justify-center mx-auto shadow-lg border border-emerald-700">
-          <Sprout className="w-8 h-8" />
-        </div>
+        <img 
+          src={logoImg} 
+          alt="NovaKrishi" 
+          className="w-14 h-14 rounded-3xl shadow-lg border border-emerald-700 mx-auto object-contain bg-white" 
+        />
 
         <h2 className="text-4xl sm:text-5xl font-extrabold font-sans tracking-tight text-white leading-tight">
           {language === 'hi' ? 'निष्पक्ष खाद्य आपूर्ति श्रृंखला बनाएं।' : 'Build a Fairer Food Supply Chain.'}

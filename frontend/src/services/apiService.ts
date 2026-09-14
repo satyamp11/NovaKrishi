@@ -33,6 +33,28 @@ const getApiBaseUrl = (): string => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
+// Safely parses a fetch Response as JSON. If the server (or a proxy in front
+// of it, e.g. Render's gateway) returned an HTML error page instead of JSON,
+// this returns a clean fallback message instead of dumping raw markup into
+// the UI.
+async function safeParseJson(response: Response): Promise<{ success: boolean; data?: any; message?: string; code?: string }> {
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    return {
+      success: false,
+      message: response.ok
+        ? 'Unexpected response from server.'
+        : `Server is unavailable (HTTP ${response.status}). It may be waking up — please try again in a moment.`,
+      code: response.ok ? 'INVALID_RESPONSE' : 'SERVICE_UNAVAILABLE',
+    };
+  }
+  try {
+    return await response.json();
+  } catch {
+    return { success: false, message: 'Received malformed data from server.', code: 'INVALID_RESPONSE' };
+  }
+}
+
 export type UserRole = 'farmer' | 'consumer' | 'bulk_buyer' | 'delivery_partner' | 'admin';
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 
@@ -520,22 +542,8 @@ export interface CropScanRecord {
   createdAt: string;
 }
 
-export interface CommunityAlertRecord {
-  id: string;
-  diseaseName: string;
-  diseaseHindi: string;
-  crop: string;
-  state: string;
-  district: string;
-  centerVillage: string;
-  severity: 'Critical' | 'Warning' | 'Low';
-  reportCount: number;
-  description: string;
-  descriptionHindi: string;
-  recommendations: string[];
-  recommendationsHindi: string[];
-  createdAt: string;
-}
+import { OutbreakCluster } from '../types';
+export type CommunityAlertRecord = OutbreakCluster;
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('krishi_shield_auth_token');
@@ -1735,7 +1743,7 @@ export const apiService = {
   async getPriceForecastStates(): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/price-forecast/states`);
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -1744,7 +1752,7 @@ export const apiService = {
   async getPriceForecastDistricts(state: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/price-forecast/districts?state=${encodeURIComponent(state)}`);
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -1753,7 +1761,7 @@ export const apiService = {
   async getPriceForecastCommodities(state: string, district: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/price-forecast/commodities?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}`);
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -1762,7 +1770,7 @@ export const apiService = {
   async getPriceForecastVarieties(state: string, district: string, commodity: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/price-forecast/varieties?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}&commodity=${encodeURIComponent(commodity)}`);
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -1771,7 +1779,7 @@ export const apiService = {
   async getPriceForecastGrades(state: string, district: string, commodity: string, variety: string): Promise<{ success: boolean; data?: string[]; message?: string; code?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/price-forecast/grades?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}&commodity=${encodeURIComponent(commodity)}&variety=${encodeURIComponent(variety)}`);
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -1780,7 +1788,7 @@ export const apiService = {
   async getPriceForecastMonths(): Promise<{ success: boolean; data?: number[]; message?: string; code?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/price-forecast/months`);
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -1800,11 +1808,16 @@ export const apiService = {
         headers: {
           'Content-Type': 'application/json'
         },
+        // predict-price can be slow on a cold ML instance; give it real room.
+        signal: AbortSignal.timeout(40000),
         body: JSON.stringify(payload)
       });
-      return await response.json();
+      return await safeParseJson(response);
     } catch (e: any) {
-      return { success: false, message: e.message };
+      const message = e?.name === 'TimeoutError' || e?.name === 'AbortError'
+        ? 'Prediction request timed out. The ML service may be waking up — please try again.'
+        : (e.message || 'Prediction failed');
+      return { success: false, message };
     }
   }
 };
