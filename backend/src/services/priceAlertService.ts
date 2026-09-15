@@ -34,7 +34,7 @@ export const priceAlertService = {
 
     try {
       // 1. Get current recorded prices for the district from mandiService
-      const result = await mandiService.getPrices({ state, district, limit: 100 });
+      const result = await mandiService.getMandiPrices({ state, district, limit: 100 });
       if (!result.success || !result.rates || result.rates.length === 0) {
         return [];
       }
@@ -58,7 +58,7 @@ export const priceAlertService = {
         const grade = record.grade || 'FAQ';
 
         try {
-          const prediction = await priceForecastService.predictFairPrice({
+          const prediction = await priceForecastService.predictPrice({
             state,
             district,
             commodity,
