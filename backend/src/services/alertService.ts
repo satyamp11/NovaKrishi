@@ -40,7 +40,6 @@ export interface WeatherAlertItem extends BaseAlert {
 export type CommunityAlertItem = DiseaseAlertItem | PriceAlertItem | WeatherAlertItem;
 
 import { DiseaseAlert } from '../models/DiseaseAlert.js';
-import { priceForecastService } from './priceForecastService.js';
 import { priceAlertService } from './priceAlertService.js';
 
 const SAMPLE_ALERTS: CommunityAlertItem[] = [
