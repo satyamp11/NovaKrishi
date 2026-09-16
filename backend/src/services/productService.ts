@@ -26,6 +26,25 @@ export interface PaginatedProductsResponse {
 }
 
 export const productService = {
+  // Get a reliable default image based on product category
+  getCategoryDefaultImage(category: string): string {
+    const defaults: Record<string, string> = {
+      'Vegetables': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/440px-Tomato_je.jpg',
+      'Fruits': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/440px-Red_Apple.jpg',
+      'Grains': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wheat_close-up.JPG/440px-Wheat_close-up.JPG',
+      'Food Grains': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wheat_close-up.JPG/440px-Wheat_close-up.JPG',
+      'Pulses': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Chickpea.jpg/440px-Chickpea.jpg',
+      'Spices': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capsicum_annuum_fruits_IMGP0050.jpg/440px-Capsicum_annuum_fruits_IMGP0050.jpg',
+      'Dairy': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/TE-Butter-Smen.jpg/440px-TE-Butter-Smen.jpg',
+      'Organic Produce': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/440px-Tomato_je.jpg',
+      'Oilseeds': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Sunflower_from_Silesia2.jpg/440px-Sunflower_from_Silesia2.jpg',
+      'Seeds': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wheat_close-up.JPG/440px-Wheat_close-up.JPG',
+      'Fertilizers': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wheat_close-up.JPG/440px-Wheat_close-up.JPG',
+      'Farm Equipment': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wheat_close-up.JPG/440px-Wheat_close-up.JPG',
+    };
+    return defaults[category] || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/440px-Tomato_je.jpg';
+  },
+
   // Convert Mongoose Doc to Clean API Response
   toProductResponse(doc: IProduct): ProductResponse {
     let resolvedImageUrl = doc.imageUrl || '/images/wheat.jpg';
@@ -186,7 +205,7 @@ export const productService = {
       availableQuantity: dto.availableQuantity,
       minOrderQuantity: dto.minOrderQuantity || 1,
       description: dto.description || '',
-      imageUrl: dto.imageUrl || 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=500&q=80',
+      imageUrl: dto.imageUrl || this.getCategoryDefaultImage(dto.category),
       farmerId: new mongoose.Types.ObjectId(farmerUser.id),
       farmerName: farmerUser.name,
       fpoName: dto.fpoName || farmerUser.farmInfo?.fpoName || '',
@@ -287,7 +306,7 @@ export const productService = {
           availableQuantity: 1500,
           minOrderQuantity: 50,
           description: 'Farm-fresh, pesticide-free red tomatoes harvested directly from Nashik beds.',
-          imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80',
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/440px-Tomato_je.jpg',
           farmerId: dummyFarmerId,
           farmerName: 'Rameshwar Singh',
           fpoName: 'Green Valley FPO',
@@ -327,7 +346,7 @@ export const productService = {
           availableQuantity: 120,
           minOrderQuantity: 5,
           description: 'High-protein organic desi chana harvested in Malwa region.',
-          imageUrl: 'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?auto=format&fit=crop&w=500&q=80',
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Chickpea.jpg/440px-Chickpea.jpg',
           farmerId: dummyFarmerId,
           farmerName: 'Suresh Malviya',
           fpoName: 'Malwa Organic FPO',
@@ -347,7 +366,7 @@ export const productService = {
           availableQuantity: 80,
           minOrderQuantity: 2,
           description: 'Authentic GI-tagged Ratnagiri Alphonso mangoes, naturally ripened.',
-          imageUrl: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=500&q=80',
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Mangoes_pic.jpg/440px-Mangoes_pic.jpg',
           farmerId: dummyFarmerId,
           farmerName: 'Konkan Fruit Producers FPO',
           fpoName: 'Konkan Mango Producer Co.',
@@ -387,7 +406,7 @@ export const productService = {
           availableQuantity: 300,
           minOrderQuantity: 5,
           description: 'Sun-dried aromatic Malabar black pepper direct from Wayanad spices estate.',
-          imageUrl: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=500&q=80',
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capsicum_annuum_fruits_IMGP0050.jpg/440px-Capsicum_annuum_fruits_IMGP0050.jpg',
           farmerId: dummyFarmerId,
           farmerName: 'Wayanad Spice Growers',
           fpoName: 'Kerala Organic Spices FPO',

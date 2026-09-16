@@ -93,6 +93,57 @@ const SAMPLE_ALERTS: CommunityAlertItem[] = [
     recommendations: ['Avoid excess nitrogen fertilizer'],
     recommendationsHindi: ['अत्यधिक नाइट्रोजन उर्वरक के प्रयोग से बचें'],
     createdAt: new Date().toISOString()
+  },
+  {
+    id: 'alert-mh-1',
+    type: 'disease',
+    diseaseName: 'Onion Purple Blotch',
+    diseaseHindi: 'प्याज पर्पल ब्लॉच',
+    crop: 'Onion',
+    state: 'Maharashtra',
+    district: 'Nashik',
+    centerVillage: 'Dindori',
+    severity: 'Warning',
+    reportCount: 6,
+    description: 'Purple blotch symptoms detected in onion bulbs in Nashik.',
+    descriptionHindi: 'नासिक में प्याज के बल्बों में पर्पल ब्लॉच के लक्षण देखे गए हैं।',
+    recommendations: ['Apply Iprodione 50% WP', 'Avoid excess irrigation'],
+    recommendationsHindi: ['इप्रोडायोन 50% डब्लूपी का छिड़काव करें', 'अत्यधिक सिंचाई से बचें'],
+    createdAt: new Date(Date.now() - 43200000).toISOString()
+  },
+  {
+    id: 'alert-rj-1',
+    type: 'disease',
+    diseaseName: 'Mustard Aphid Infestation',
+    diseaseHindi: 'सरसों माहू कीट प्रकोप',
+    crop: 'Mustard',
+    state: 'Rajasthan',
+    district: 'Jaipur',
+    centerVillage: 'Chomu',
+    severity: 'Critical',
+    reportCount: 8,
+    description: 'Severe aphid attack observed on mustard crops across Jaipur district.',
+    descriptionHindi: 'जयपुर जिले में सरसों की फसलों पर माहू कीट का भारी प्रकोप देखा जा रहा है।',
+    recommendations: ['Spray Dimethoate 30% EC @ 1L/acre', 'Spray in early morning'],
+    recommendationsHindi: ['डाइमेथोएट 30% ईसी 1 लीटर/एकड़ की दर से छिड़काव करें', 'सुबह जल्दी छिड़काव करें'],
+    createdAt: new Date(Date.now() - 21600000).toISOString()
+  },
+  {
+    id: 'alert-tn-1',
+    type: 'disease',
+    diseaseName: 'Banana Fusarium Wilt',
+    diseaseHindi: 'केला फ्यूजेरियम विल्ट',
+    crop: 'Banana',
+    state: 'Tamil Nadu',
+    district: 'Coimbatore',
+    centerVillage: 'Pollachi',
+    severity: 'Warning',
+    reportCount: 3,
+    description: 'Fusarium wilt detected in banana plantations near Pollachi.',
+    descriptionHindi: 'पोलाची के पास केले के बागानों में फ्यूजेरियम विल्ट की पुष्टि हुई है।',
+    recommendations: ['Remove and destroy infected plants', 'Apply Carbendazim soil drench'],
+    recommendationsHindi: ['संक्रमित पौधों को उखाड़कर नष्ट करें', 'कार्बेंडाज़िम का मिट्टी में घोल डालें'],
+    createdAt: new Date(Date.now() - 64800000).toISOString()
   }
 ];
 
@@ -140,9 +191,11 @@ export const alertService = {
             results = results.filter((a) => a.district.toLowerCase() === district.toLowerCase());
         }
         if (crop && crop !== 'All') {
-            results = results.filter((a) => (a as DiseaseAlertItem).crop.toLowerCase().includes(crop.toLowerCase()));
+            results = results.filter((a) => (a as DiseaseAlertItem).crop?.toLowerCase().includes(crop.toLowerCase()));
         }
-        combinedAlerts.push(...(results.length > 0 ? results : SAMPLE_ALERTS.slice(0, 2)));
+        // If filtered results found, use them. Otherwise return ALL sample alerts 
+        // (from multiple regions) — never silently default to only Gorakhpur data.
+        combinedAlerts.push(...(results.length > 0 ? results : SAMPLE_ALERTS));
     }
 
     // 2. Fetch Weather Alerts

@@ -13,6 +13,7 @@ interface AlertsScreenProps {
   error?: string | null;
   onNavigateToScan: () => void;
   onNavigateToMap: () => void;
+  onNavigateToPriceEstimator?: () => void;
   sunlightMode: boolean;
 }
 
@@ -23,6 +24,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({
   error = null,
   onNavigateToScan,
   onNavigateToMap,
+  onNavigateToPriceEstimator,
   sunlightMode
 }) => {
   const t = translations[language];
@@ -111,7 +113,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({
         <p className="text-sm text-slate-600 font-semibold">{alert.description}</p>
       </div>
       <div className="flex items-center gap-3 pt-2">
-        <button className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-2xl shadow flex items-center justify-center gap-2">
+        <button onClick={() => onNavigateToPriceEstimator?.()} className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-2xl shadow flex items-center justify-center gap-2">
           View AI Price Estimator
         </button>
       </div>
