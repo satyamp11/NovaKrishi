@@ -331,9 +331,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ language }) => {
           </button>
 
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="NovaKrishi Logo" 
+              className="w-10 h-10 rounded-full object-cover bg-white shadow-md border border-emerald-600/30 shrink-0" 
+            />
             <div>
               <span className="text-[10px] font-extrabold text-emerald-300 uppercase tracking-widest block">NovaKrishi Platform</span>
               <h3 className="text-xl sm:text-2xl font-black">

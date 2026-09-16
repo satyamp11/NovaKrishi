@@ -354,25 +354,45 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </div>
 
               <div className="space-y-3">
-                {communityAlerts.map((alert) => (
-                  <div key={alert.id} className="p-3.5 bg-amber-50/60 border border-amber-200 rounded-2xl space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-amber-900 flex items-center gap-1">
-                        ⚠️ {language === 'hi' ? alert.diseaseHindi : alert.diseaseName}
-                      </span>
-                      <span className="text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full">
-                        {alert.severity}
-                      </span>
+                {communityAlerts.map((alert) => {
+                  let title = '';
+                  let description = '';
+                  let footer = '';
+
+                  if (alert.type === 'disease') {
+                    title = language === 'hi' ? alert.diseaseHindi : alert.diseaseName;
+                    description = (language === 'hi' ? alert.recommendationsHindi?.[0] : alert.recommendations?.[0]) || '';
+                    footer = `Crop: ${alert.crop} • ${alert.centerVillage}`;
+                  } else if (alert.type === 'price') {
+                    title = `${alert.commodity} Price Alert`;
+                    description = alert.description;
+                    footer = `${alert.direction.toUpperCase()} (${alert.percentChange}%)`;
+                  } else if (alert.type === 'weather') {
+                    title = `${alert.condition} Alert`;
+                    description = alert.description;
+                    footer = alert.recommendation;
+                  }
+
+                  return (
+                    <div key={alert.id} className="p-3.5 bg-amber-50/60 border border-amber-200 rounded-2xl space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-amber-900 flex items-center gap-1">
+                          ⚠️ {title}
+                        </span>
+                        <span className="text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full">
+                          {alert.severity}
+                        </span>
+                      </div>
+                      <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                        {description}
+                      </p>
+                      <div className="text-[11px] font-bold text-slate-500 pt-1 flex items-center justify-between">
+                        <span>{footer}</span>
+                        <button onClick={onNavigateToAlerts} className="text-amber-800 underline font-black">View Alert</button>
+                      </div>
                     </div>
-                    <p className="text-xs text-amber-800 font-medium leading-relaxed">
-                      {language === 'hi' ? alert.descriptionHindi : alert.description}
-                    </p>
-                    <div className="text-[11px] font-bold text-slate-500 pt-1 flex items-center justify-between">
-                      <span>Crop: {alert.crop} • {alert.centerVillage}</span>
-                      <button onClick={onNavigateToAlerts} className="text-amber-800 underline font-black">View Alert</button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

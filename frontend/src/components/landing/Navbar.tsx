@@ -78,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img 
               src={logoImg} 
               alt="NovaKrishi" 
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl shadow-xs shrink-0 object-contain bg-white" 
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full shadow-md shrink-0 object-cover border border-emerald-600/30" 
             />
             <div className="flex flex-col min-w-0">
               <span className="text-xl sm:text-2xl font-black font-brand tracking-tight text-[#1b4332] leading-tight">

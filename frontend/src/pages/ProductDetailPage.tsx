@@ -156,11 +156,29 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             {/* Left Column: Image Gallery & Badges */}
             <div className="lg:col-span-6 space-y-4">
               <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-96 sm:h-[450px] relative">
-                <img
-                  src={product.imageUrl}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
+                {(() => {
+                  const img = product.imageUrl || '';
+                  const isGhee = product.title.toLowerCase().includes('ghee');
+                  const isWheatOrCert =
+                    product.title.toLowerCase().includes('wheat') ||
+                    img.toLowerCase().includes('certificate') ||
+                    img.toLowerCase().includes('yhills') ||
+                    img.toLowerCase().includes('completion') ||
+                    img.toLowerCase().includes('award') ||
+                    img.toLowerCase().includes('internship');
+                  const finalImg = isGhee
+                    ? '/images/ghee.jpg'
+                    : isWheatOrCert
+                    ? '/images/crops/wheat.jpg'
+                    : (img || '/images/crops/wheat.jpg');
+                  return (
+                    <img
+                      src={finalImg}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                    />
+                  );
+                })()}
                 
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
                   <Badge variant="primary" size="md">

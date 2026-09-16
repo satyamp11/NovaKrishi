@@ -184,6 +184,7 @@ export const DISEASE_DATABASE: Record<string, DiseaseInfo> = {
 export const INITIAL_CLUSTERS: OutbreakCluster[] = [
   {
     id: "cluster-1",
+    type: "disease",
     diseaseName: "Tomato Early Blight",
     diseaseHindi: "टमाटर अगेती झुलसा",
     crop: "Tomato",
@@ -206,6 +207,7 @@ export const INITIAL_CLUSTERS: OutbreakCluster[] = [
   },
   {
     id: "cluster-2",
+    type: "disease",
     diseaseName: "Yellow Rust of Wheat",
     diseaseHindi: "गेहूं का पीला रतुआ",
     crop: "Wheat",
@@ -295,7 +297,7 @@ export const FARMER_IMAGES = {
   farmerPrimary: "/hero.jpg",
   farmerInspect: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80",
   farmerGroup: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=800&q=80",
-  cropWheat: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80",
+  cropWheat: "/images/crops/wheat.jpg",
   cropTomato: "https://images.unsplash.com/photo-1592417817098-8f3d6eb231fc?auto=format&fit=crop&w=800&q=80",
   cropField: "/hero.jpg"
 };

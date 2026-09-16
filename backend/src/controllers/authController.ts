@@ -83,7 +83,8 @@ export const authController = {
       console.error('Error during registration:', error);
       return res.status(500).json({
         success: false,
-        message: 'An unexpected server error occurred during registration.'
+        message: error instanceof Error ? error.message : 'An unexpected server error occurred during registration.',
+        error: error
       });
     }
   },

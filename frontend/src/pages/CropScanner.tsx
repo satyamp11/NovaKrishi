@@ -112,7 +112,7 @@ export const CropScanner: React.FC<CropScannerProps> = ({
                   src={selectedImage} 
                   alt="Crop Leaf Sample" 
                   onError={(e) => {
-                    e.currentTarget.src = "/images/crops/tomato.jpg";
+                    e.currentTarget.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Tomato_leaf_early_blight.jpg/640px-Tomato_leaf_early_blight.jpg";
                   }}
                   className="w-full h-full object-cover opacity-90"
                 />
@@ -193,7 +193,7 @@ export const CropScanner: React.FC<CropScannerProps> = ({
                         src={preset.image} 
                         alt={preset.label} 
                         onError={(e) => {
-                          e.currentTarget.src = "/images/crops/tomato.jpg";
+                          e.currentTarget.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Tomato_leaf_early_blight.jpg/640px-Tomato_leaf_early_blight.jpg";
                         }}
                         className="w-12 h-12 rounded-xl object-cover border border-slate-200"
                       />

@@ -6,7 +6,7 @@
     "diseaseName": "Yellow Rust of Wheat",
     "diseaseHindi": "गेहूं का पीला रतुआ (हल्दी रोग)",
     "confidence": 91,
-    "imageUrl": "/images/crops/tomato.jpg",
+    "imageUrl": "/images/crops/wheat.jpg",
     "result": "Infected",
     "recommendations": [
       "Spray Propiconazole 25% EC (Tilt) @ 1 ml per Liter of water immediately",

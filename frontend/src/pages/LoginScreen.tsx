@@ -170,7 +170,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             src="/logo.png" 
             alt="NovaKrishi Logo" 
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            className="w-24 h-24 object-contain rounded-2xl mx-auto shadow-md"
+            className="w-24 h-24 object-cover rounded-full mx-auto shadow-md border-2 border-emerald-600/30"
           />
           <h1 className="font-serif-title font-extrabold text-3xl text-[#1b4332]">
             {step === 'profile' ? t.profileTitle : t.loginTitle}

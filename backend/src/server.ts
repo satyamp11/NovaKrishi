@@ -24,6 +24,7 @@ import reviewRouter from './routes/reviewRoutes.js';
 import disputeRouter from './routes/disputeRoutes.js';
 import qualityRouter from './routes/quality.routes.js';
 import { priceForecastRouter } from './routes/priceForecast.routes.js';
+import chatbotRouter from './routes/chatbot.routes.js';
 import { deliveryController } from './controllers/deliveryController.js';
 
 export const app = express();
@@ -66,6 +67,7 @@ app.use('/api/market-rates', marketRatesRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/disease-scan', diseaseRouter);
 app.use('/api/price-forecast', priceForecastRouter);
+app.use('/api', chatbotRouter);
 
 // Centralized Error Handler
 app.use(errorHandler);

@@ -55,6 +55,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const supplierDisplay = fpoName ? fpoName : farmerName;
 
+  const isGhee = title.toLowerCase().includes('ghee');
+  const isWheatOrCert =
+    title.toLowerCase().includes('wheat') ||
+    (imageUrl && (
+      imageUrl.toLowerCase().includes('certificate') ||
+      imageUrl.toLowerCase().includes('yhills') ||
+      imageUrl.toLowerCase().includes('completion') ||
+      imageUrl.toLowerCase().includes('award') ||
+      imageUrl.toLowerCase().includes('internship')
+    ));
+  const finalImageUrl = isGhee
+    ? '/images/ghee.jpg'
+    : isWheatOrCert
+    ? '/images/wheat.jpg'
+    : (imageUrl || '/images/wheat.jpg');
+
   return (
     <div
       className={`bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col group ${className}`}
@@ -76,7 +92,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onClick={() => onViewDetails && onViewDetails(id)}
       >
         <img
-          src={imageUrl}
+          src={finalImageUrl}
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
