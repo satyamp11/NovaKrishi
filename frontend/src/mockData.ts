@@ -40,7 +40,7 @@ export const ALL_INDIAN_STATES = [
   'West Bengal'
 ];
 
-// High-quality local crop sample photos
+// High-quality crop disease sample photos from reliable CDN
 export const CROP_IMAGES = {
   tomatoBlight: "/images/crops/tomato.jpg",
   wheatRust: "/images/crops/wheat.jpg",

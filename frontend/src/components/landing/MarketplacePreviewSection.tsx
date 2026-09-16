@@ -26,7 +26,7 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: true,
       rating: 4.9,
       reviewCount: 48,
-      imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80',
+      imageUrl: '/images/crops/tomato.jpg',
     },
     {
       id: 'p2',
@@ -42,7 +42,7 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: true,
       rating: 4.8,
       reviewCount: 32,
-      imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80',
+      imageUrl: '/images/crops/potato.jpg',
     },
     {
       id: 'p3',
@@ -58,7 +58,7 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: false,
       rating: 4.95,
       reviewCount: 64,
-      imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=500&q=80',
+      imageUrl: '/images/crops/wheat.jpg',
     },
     {
       id: 'p4',
@@ -74,7 +74,7 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: true,
       rating: 4.7,
       reviewCount: 29,
-      imageUrl: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=500&q=80',
+      imageUrl: '/images/crops/onion.jpg',
     },
     {
       id: 'p5',
@@ -90,7 +90,7 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: true,
       rating: 5.0,
       reviewCount: 88,
-      imageUrl: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=500&q=80',
+      imageUrl: '/images/crops/mango.jpg',
     },
   ];
 
