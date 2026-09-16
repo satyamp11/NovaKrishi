@@ -48,6 +48,7 @@ import { CommunityScreen } from './pages/CommunityScreen';
 import { ProfileScreen } from './pages/ProfileScreen';
 
 import { apiService, UserRole } from './services/apiService';
+import { KrishiBot } from './components/chatbot/KrishiBot';
 
 const PROTECTED_TABS: TabType[] = ['home', 'scan', 'result', 'map', 'alerts', 'report', 'community', 'profile'];
 
@@ -270,7 +271,7 @@ export function AppContent() {
     }
   };
 
-  const showHeaderAndNav = activeTab !== 'splash' && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'ui-showcase' && activeTab !== 'role-dashboard' && activeTab !== 'marketplace' && activeTab !== 'product-detail' && activeTab !== 'orders' && activeTab !== 'logistics' && activeTab !== 'logistics-optimization' && activeTab !== 'demand-forecast' && activeTab !== 'price-insights' && activeTab !== 'mandi' && activeTab !== 'tracking';
+  const showHeaderAndNav = activeTab !== 'splash' && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'ui-showcase' && activeTab !== 'role-dashboard' && activeTab !== 'marketplace' && activeTab !== 'product-detail' && activeTab !== 'orders' && activeTab !== 'logistics' && activeTab !== 'logistics-optimization' && activeTab !== 'demand-forecast' && activeTab !== 'tracking';
 
   const activeUserRole: UserRole = user?.role || simulatedRole;
 
@@ -596,6 +597,7 @@ export function AppContent() {
             error={alertsError}
             onNavigateToScan={() => handleNavigateWithAuth('scan')}
             onNavigateToMap={() => handleNavigateWithAuth('map')}
+            onNavigateToPriceEstimator={() => navigateToTab('price-insights')}
             sunlightMode={sunlightMode}
           />
         )}
@@ -662,6 +664,13 @@ export function AppContent() {
       {/* Global Authentication Modal */}
       <AuthModal language={language} />
 
+      {/* Global Chatbot */}
+      <KrishiBot
+        language={language}
+        farmerDistrict={farmer.district}
+        farmerState={farmer.state}
+        onNavigate={navigateToTab}
+      />
     </MobileFrameWrapper>
   );
 }
