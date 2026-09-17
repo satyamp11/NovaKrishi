@@ -97,6 +97,58 @@ export const MOCK_SCAN_RESULTS: Record<string, AiScanResult> = {
       "Document current variety and practices for reference in next season"
     ],
     message: "✅ Congratulations! Your wheat crop appears healthy. Continue current management practices."
+  },
+
+  tomato_blight: {
+    crop: "Tomato",
+    disease: "Early Blight (Alternaria solani)",
+    status: "diseased",
+    confidence: 96.8,
+    symptoms: [
+      "Dark, concentric 'bullseye' rings on older leaves",
+      "Yellowing of leaf tissue around the spots (chlorosis)",
+      "Stem lesions that may girdle young seedlings",
+      "Dark, leathery sunken spots on fruit near the stem"
+    ],
+    cause: "Fungal pathogen Alternaria solani. Spread by wind, rain splash, and infected debris. Favored by warm temperatures and heavy dew or frequent rain.",
+    treatment: [
+      "Apply Chlorothalonil or Mancozeb-based fungicides immediately",
+      "Prune affected lower leaves to improve air circulation",
+      "Avoid overhead watering; use drip irrigation",
+      "Apply copper-based sprays as an organic alternative"
+    ],
+    prevention: [
+      "Use certified disease-free seeds and resistant varieties",
+      "Practice 3-4 year crop rotation (avoid potatoes, peppers, eggplants)",
+      "Stake or cage plants to keep foliage off the ground",
+      "Apply thick organic mulch to prevent soil splashing"
+    ]
+  },
+
+  rice_blast: {
+    crop: "Rice",
+    disease: "Rice Blast (Magnaporthe grisea)",
+    status: "diseased",
+    confidence: 93.4,
+    symptoms: [
+      "Spindle-shaped or diamond-shaped lesions on leaves",
+      "Lesions have grey centers with dark brown margins",
+      "Collar rot (necrosis at the junction of leaf blade and sheath)",
+      "Neck blast (dark lesions at the base of the panicle causing grain to blank)"
+    ],
+    cause: "Fungal pathogen Magnaporthe grisea. One of the most destructive rice diseases globally. Spreads via airborne spores. Highly favored by high nitrogen application, high humidity, and prolonged leaf wetness.",
+    treatment: [
+      "Apply Tricyclazole 75 WP (0.6g/litre) or Isoprothiolane 40 EC (1.5ml/litre)",
+      "Alternative: Propiconazole 25 EC or Hexaconazole 5 EC",
+      "Drain the field for a few days if currently flooded (manage water carefully)",
+      "Avoid applying additional urea fertilizer while the disease is active"
+    ],
+    prevention: [
+      "Plant blast-resistant rice varieties suitable for your region",
+      "Apply nitrogen fertilizer in splits rather than a single heavy dose",
+      "Ensure proper planting density to allow good canopy aeration",
+      "Destroy infected crop residue after harvest"
+    ]
   }
 };
 

@@ -41,6 +41,22 @@ const samplePresets = [
     badge: "Healthy",
     badgeColor: "bg-emerald-100 text-emerald-700"
   },
+  {
+    label: "Tomato Early Blight",
+    crop: "Tomato",
+    image: "https://upload.wikimedia.org/wikipedia/commons/7/70/Early_blight_on_tomato_leaves_%287871930010%29.jpg",
+    mockKey: "tomato_blight",
+    badge: "Infected",
+    badgeColor: "bg-red-100 text-red-700"
+  },
+  {
+    label: "Rice Blast",
+    crop: "Rice",
+    image: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rice_blast_Magnaporthe_grisea.jpg",
+    mockKey: "rice_blast",
+    badge: "Warning",
+    badgeColor: "bg-amber-100 text-amber-700"
+  },
 ];
 
 // Sleep helper for artificial delay
