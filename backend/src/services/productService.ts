@@ -306,11 +306,11 @@ export const productService = {
           availableQuantity: 1500,
           minOrderQuantity: 50,
           description: 'Farm-fresh, pesticide-free red tomatoes harvested directly from Nashik beds.',
-<<<<<<< HEAD
+
           imageUrl: 'https://images.unsplash.com/photo-1592417817098-8f3d6eb231fc?auto=format&fit=crop&w=600&q=80',
-=======
+
           imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/440px-Tomato_je.jpg',
->>>>>>> 0e8ebdd523ce486c2608e390b42c6b45e4b2e241
+
           farmerId: dummyFarmerId,
           farmerName: 'Rameshwar Singh',
           fpoName: 'Green Valley FPO',
@@ -370,11 +370,11 @@ export const productService = {
           availableQuantity: 80,
           minOrderQuantity: 2,
           description: 'Authentic GI-tagged Ratnagiri Alphonso mangoes, naturally ripened.',
-<<<<<<< HEAD
+
           imageUrl: 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80',
-=======
+
           imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Mangoes_pic.jpg/440px-Mangoes_pic.jpg',
->>>>>>> 0e8ebdd523ce486c2608e390b42c6b45e4b2e241
+
           farmerId: dummyFarmerId,
           farmerName: 'Konkan Fruit Producers FPO',
           fpoName: 'Konkan Mango Producer Co.',

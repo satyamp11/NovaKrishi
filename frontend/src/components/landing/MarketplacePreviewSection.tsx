@@ -26,11 +26,11 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: true,
       rating: 4.9,
       reviewCount: 48,
-<<<<<<< HEAD
+
       imageUrl: '/images/fresh-tomato.jpg',
-=======
+
       imageUrl: '/images/crops/tomato.jpg',
->>>>>>> 0e8ebdd523ce486c2608e390b42c6b45e4b2e241
+
     },
     {
       id: 'p2',
@@ -94,11 +94,11 @@ export const MarketplacePreviewSection: React.FC<MarketplacePreviewSectionProps>
       isOrganicCertified: true,
       rating: 5.0,
       reviewCount: 88,
-<<<<<<< HEAD
+
       imageUrl: 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80',
-=======
+
       imageUrl: '/images/crops/mango.jpg',
->>>>>>> 0e8ebdd523ce486c2608e390b42c6b45e4b2e241
+
     },
   ];
 
