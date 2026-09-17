@@ -4,7 +4,7 @@ import type {
   OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel, MarketRate
 } from './types';
 import type { AiScanResult } from './scanTypes';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { 
   INITIAL_FARMER, INITIAL_WEATHER, INITIAL_CLUSTERS, 
   INITIAL_REPORTS, COMMUNITY_ACTIVITIES 
@@ -608,7 +608,24 @@ export function AppContent() {
           <ReportScreen
             language={language}
             farmer={farmer}
-            initialDisease={currentDiagnosis}
+            initialDisease={currentDiagnosis ? {
+              id: 'ai-scan',
+              name: currentDiagnosis.disease,
+              nameHindi: currentDiagnosis.disease,
+              crop: currentDiagnosis.crop,
+              cropHindi: currentDiagnosis.crop,
+              confidence: currentDiagnosis.confidence,
+              severity: 'High',
+              symptoms: currentDiagnosis.symptoms,
+              symptomsHindi: currentDiagnosis.symptoms,
+              organicAction: currentDiagnosis.treatment,
+              organicActionHindi: currentDiagnosis.treatment,
+              chemicalAction: currentDiagnosis.treatment,
+              chemicalActionHindi: currentDiagnosis.treatment,
+              prevention: currentDiagnosis.prevention,
+              preventionHindi: currentDiagnosis.prevention,
+              sampleImage: scannedImage
+            } : null}
             onReportSubmitted={handleReportSubmitted}
             onBack={() => handleNavigateWithAuth('result')}
             sunlightMode={sunlightMode}
