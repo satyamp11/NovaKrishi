@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import type { 
   TabType, Language, FarmerProfile, WeatherData, OutbreakCluster, 
-  OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel 
+  OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel, AiScanResult
 } from './types';
 import { 
   INITIAL_FARMER, INITIAL_WEATHER, INITIAL_CLUSTERS, 
-  INITIAL_REPORTS, COMMUNITY_ACTIVITIES, DISEASE_DATABASE 
+  INITIAL_REPORTS, COMMUNITY_ACTIVITIES 
 } from './mockData';
 
 // Layout & Navigation Components
@@ -162,7 +162,7 @@ export function AppContent() {
   const [unreadAlertsCount, setUnreadAlertsCount] = useState<number>(2);
 
   // Active Diagnosis State
-  const [currentDiagnosis, setCurrentDiagnosis] = useState<DiseaseInfo>(DISEASE_DATABASE.tomato_blight);
+  const [currentDiagnosis, setCurrentDiagnosis] = useState<AiScanResult | null>(null);
   const [scannedImage, setScannedImage] = useState<string>('');
 
   // Simulator Modal State
@@ -175,21 +175,21 @@ export function AppContent() {
     setActiveTab('home');
   };
 
-  const handleScanComplete = (result: DiseaseInfo, uploadedImage: string) => {
+  const handleScanComplete = (result: AiScanResult, uploadedImage: string) => {
     setCurrentDiagnosis(result);
     setScannedImage(uploadedImage);
     setActiveTab('result');
 
-    if (token) {
+    if (token && result.status !== 'unknown') {
       apiService.saveCropScan(token, {
         cropName: result.crop || 'Crop',
-        diseaseName: result.name,
-        diseaseHindi: result.nameHindi,
+        diseaseName: result.disease || 'Unknown',
+        diseaseHindi: result.disease || 'Unknown',
         confidence: result.confidence || 95,
         imageUrl: uploadedImage,
-        result: result.name.toLowerCase().includes('healthy') ? 'Healthy' : 'Infected',
-        recommendations: result.chemicalAction || result.organicAction || [],
-        recommendationsHindi: result.chemicalActionHindi || result.organicActionHindi || []
+        result: result.status === 'healthy' ? 'Healthy' : 'Infected',
+        recommendations: result.treatment || result.prevention || [],
+        recommendationsHindi: result.treatment || result.prevention || []
       });
     }
   };
@@ -568,7 +568,7 @@ export function AppContent() {
           />
         )}
 
-        {activeTab === 'result' && (
+        {activeTab === 'result' && currentDiagnosis && (
           <ScanResult
             language={language}
             disease={currentDiagnosis}

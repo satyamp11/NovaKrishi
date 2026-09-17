@@ -9,3 +9,6 @@ scanRouter.post('/', requireAuth, scanController.createScan);
 
 // GET /api/scans - Fetch farmer's scan history (Protected)
 scanRouter.get('/', requireAuth, scanController.getFarmerScans);
+
+// POST /api/scans/analyze - Analyze crop image using Gemini AI
+scanRouter.post('/analyze', scanController.analyzeImage);

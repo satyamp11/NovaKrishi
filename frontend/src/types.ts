@@ -47,6 +47,7 @@ export interface AiScanResult {
   treatment: string[];
   prevention: string[];
   message?: string;
+  // added to force git track
 }
 
 export interface OutbreakReport {
