@@ -14,7 +14,7 @@ function getCropImage(commodityName: string): string {
   const name = commodityName.toLowerCase();
   if (name.includes('wheat') || name.includes('gehun')) return '/images/crops/wheat.jpg';
   if (name.includes('rice') || name.includes('paddy') || name.includes('dhan')) return '/images/crops/rice.jpg';
-  if (name.includes('tomato') || name.includes('tamatar')) return '/images/crops/tomato.jpg';
+  if (name.includes('tomato') || name.includes('tamatar')) return 'https://images.unsplash.com/photo-1592417817098-8f3d6eb231fc?auto=format&fit=crop&w=600&q=80';
   if (name.includes('potato') || name.includes('aalu')) return '/images/crops/potato.jpg';
   if (name.includes('onion') || name.includes('pyaz')) return '/images/crops/onion.jpg';
   if (name.includes('mustard') || name.includes('sarson') || name.includes('saarso')) return '/images/crops/mustard.jpg';
@@ -28,7 +28,7 @@ function getCropImage(commodityName: string): string {
   if (name.includes('pepper') || name.includes('mirch')) return '/images/crops/black-pepper.jpg';
   if (name.includes('soya') || name.includes('soyabean')) return '/images/crops/soyabean.jpg';
   if (name.includes('groundnut') || name.includes('peanut') || name.includes('moongfali')) return '/images/crops/groundnut.jpg';
-  if (name.includes('mango') || name.includes('aam')) return '/images/crops/mango.jpg';
+  if (name.includes('mango') || name.includes('aam')) return 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80';
   return '/images/crops/wheat.jpg'; // fallback
 }
 
@@ -607,7 +607,7 @@ const COMPREHENSIVE_MANDI_DATABASE: MarketRate[] = [
     lastUpdated: "Today, 09:00 AM",
     trend7d: [790, 800, 810, 825, 835, 840, 850],
     trend30d: [700, 730, 760, 790, 820, 840, 850],
-    image: "/images/crops/mango.jpg"
+    image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80"
   },
 
   // Rajasthan Mandis

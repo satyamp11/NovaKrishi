@@ -158,6 +158,16 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-96 sm:h-[450px] relative">
                 {(() => {
                   const img = product.imageUrl || '';
+                  const isTomato =
+                    product.title.toLowerCase().includes('tomato') ||
+                    product.title.toLowerCase().includes('tamatar') ||
+                    img.includes('1592924357228');
+
+                  const isMango =
+                    product.title.toLowerCase().includes('mango') ||
+                    product.title.toLowerCase().includes('aam') ||
+                    img.includes('1553279768');
+
                   const isGhee = product.title.toLowerCase().includes('ghee');
                   const isWheatOrCert =
                     product.title.toLowerCase().includes('wheat') ||
@@ -166,15 +176,31 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     img.toLowerCase().includes('completion') ||
                     img.toLowerCase().includes('award') ||
                     img.toLowerCase().includes('internship');
-                  const finalImg = isGhee
+
+                  const finalImg = isTomato
+                    ? '/images/fresh-tomato.jpg'
+                    : isMango
+                    ? 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80'
+                    : isGhee
                     ? '/images/ghee.jpg'
                     : isWheatOrCert
-                    ? '/images/crops/wheat.jpg'
-                    : (img || '/images/crops/wheat.jpg');
+                    ? '/images/wheat.jpg'
+                    : (img && img !== '/images/crops/tomato.jpg' && img !== '/images/crops/mango.jpg'
+                        ? img
+                        : '/images/wheat.jpg');
                   return (
                     <img
                       src={finalImg}
                       alt={product.title}
+                      onError={(e) => {
+                        if (isTomato) {
+                          e.currentTarget.src = '/images/fresh-tomato.jpg';
+                        } else if (isMango) {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80';
+                        } else {
+                          e.currentTarget.src = '/images/wheat.jpg';
+                        }
+                      }}
                       className="w-full h-full object-cover"
                     />
                   );

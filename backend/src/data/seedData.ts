@@ -405,7 +405,7 @@ export const INITIAL_MARKET_RATES: MarketRate[] = [
     lastUpdated: "Today, 09:55 AM",
     trend7d: [88, 89, 91, 92, 93, 94, 95],
     trend30d: [75, 80, 83, 86, 90, 92, 95],
-    image: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80"
   }
 ];
 

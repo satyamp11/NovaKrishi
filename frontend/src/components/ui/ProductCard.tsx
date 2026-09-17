@@ -55,6 +55,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const supplierDisplay = fpoName ? fpoName : farmerName;
 
+  const isTomato =
+    title.toLowerCase().includes('tomato') ||
+    title.toLowerCase().includes('tamatar') ||
+    (imageUrl && imageUrl.includes('1592924357228'));
+
+  const isMango =
+    title.toLowerCase().includes('mango') ||
+    title.toLowerCase().includes('aam') ||
+    (imageUrl && imageUrl.includes('1553279768'));
+
   const isGhee = title.toLowerCase().includes('ghee');
   const isWheatOrCert =
     title.toLowerCase().includes('wheat') ||
@@ -65,11 +75,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       imageUrl.toLowerCase().includes('award') ||
       imageUrl.toLowerCase().includes('internship')
     ));
-  const finalImageUrl = isGhee
+
+  const finalImageUrl = isTomato
+    ? '/images/fresh-tomato.jpg'
+    : isMango
+    ? 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80'
+    : isGhee
     ? '/images/ghee.jpg'
     : isWheatOrCert
     ? '/images/wheat.jpg'
-    : (imageUrl || '/images/wheat.jpg');
+    : (imageUrl && imageUrl !== '/images/crops/tomato.jpg' && imageUrl !== '/images/crops/mango.jpg'
+        ? imageUrl
+        : '/images/wheat.jpg');
 
   return (
     <div
@@ -94,6 +111,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={finalImageUrl}
           alt={title}
+          onError={(e) => {
+            if (isTomato) {
+              e.currentTarget.src = '/images/fresh-tomato.jpg';
+            } else if (isMango) {
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80';
+            } else {
+              e.currentTarget.src = '/images/wheat.jpg';
+            }
+          }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         

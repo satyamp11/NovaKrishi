@@ -69,7 +69,7 @@ export const UIFoundationShowcase: React.FC = () => {
       availableQuantity: 1500,
       rating: 4.9,
       reviewCount: 42,
-      imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1592417817098-8f3d6eb231fc?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'prod-3',

@@ -328,7 +328,7 @@ export const INITIAL_MARKET_RATES: MarketRate[] = [
     lastUpdated: "Today, 09:00 AM",
     trend7d: [790, 800, 810, 825, 835, 840, 850],
     trend30d: [700, 730, 760, 790, 820, 840, 850],
-    image: "/images/crops/mango.jpg"
+    image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=80"
   }
 ];
 
