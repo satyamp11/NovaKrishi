@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import type { 
   TabType, Language, FarmerProfile, WeatherData, OutbreakCluster, 
-  OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel 
+  OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel, MarketRate
 } from './types';
+import type { AiScanResult } from './scanTypes';
+import { AuthProvider } from './context/AuthContext';
 import { 
   INITIAL_FARMER, INITIAL_WEATHER, INITIAL_CLUSTERS, 
-  INITIAL_REPORTS, COMMUNITY_ACTIVITIES, DISEASE_DATABASE 
+  INITIAL_REPORTS, COMMUNITY_ACTIVITIES 
 } from './mockData';
 
 // Layout & Navigation Components
@@ -48,6 +50,7 @@ import { CommunityScreen } from './pages/CommunityScreen';
 import { ProfileScreen } from './pages/ProfileScreen';
 
 import { apiService, UserRole } from './services/apiService';
+import { KrishiBot } from './components/chatbot/KrishiBot';
 
 const PROTECTED_TABS: TabType[] = ['home', 'scan', 'result', 'map', 'alerts', 'report', 'community', 'profile'];
 
@@ -161,7 +164,7 @@ export function AppContent() {
   const [unreadAlertsCount, setUnreadAlertsCount] = useState<number>(2);
 
   // Active Diagnosis State
-  const [currentDiagnosis, setCurrentDiagnosis] = useState<DiseaseInfo>(DISEASE_DATABASE.tomato_blight);
+  const [currentDiagnosis, setCurrentDiagnosis] = useState<AiScanResult | null>(null);
   const [scannedImage, setScannedImage] = useState<string>('');
 
   // Simulator Modal State
@@ -174,21 +177,21 @@ export function AppContent() {
     setActiveTab('home');
   };
 
-  const handleScanComplete = (result: DiseaseInfo, uploadedImage: string) => {
+  const handleScanComplete = (result: AiScanResult, uploadedImage: string) => {
     setCurrentDiagnosis(result);
     setScannedImage(uploadedImage);
     setActiveTab('result');
 
-    if (token) {
+    if (token && result.status !== 'unknown') {
       apiService.saveCropScan(token, {
         cropName: result.crop || 'Crop',
-        diseaseName: result.name,
-        diseaseHindi: result.nameHindi,
+        diseaseName: result.disease || 'Unknown',
+        diseaseHindi: result.disease || 'Unknown',
         confidence: result.confidence || 95,
         imageUrl: uploadedImage,
-        result: result.name.toLowerCase().includes('healthy') ? 'Healthy' : 'Infected',
-        recommendations: result.chemicalAction || result.organicAction || [],
-        recommendationsHindi: result.chemicalActionHindi || result.organicActionHindi || []
+        result: result.status === 'healthy' ? 'Healthy' : 'Infected',
+        recommendations: result.treatment || result.prevention || [],
+        recommendationsHindi: result.treatment || result.prevention || []
       });
     }
   };
@@ -270,7 +273,7 @@ export function AppContent() {
     }
   };
 
-  const showHeaderAndNav = activeTab !== 'splash' && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'ui-showcase' && activeTab !== 'role-dashboard' && activeTab !== 'marketplace' && activeTab !== 'product-detail' && activeTab !== 'orders' && activeTab !== 'logistics' && activeTab !== 'logistics-optimization' && activeTab !== 'demand-forecast' && activeTab !== 'price-insights' && activeTab !== 'mandi' && activeTab !== 'tracking';
+  const showHeaderAndNav = activeTab !== 'splash' && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'ui-showcase' && activeTab !== 'role-dashboard' && activeTab !== 'marketplace' && activeTab !== 'product-detail' && activeTab !== 'orders' && activeTab !== 'logistics' && activeTab !== 'logistics-optimization' && activeTab !== 'demand-forecast' && activeTab !== 'tracking';
 
   const activeUserRole: UserRole = user?.role || simulatedRole;
 
@@ -567,7 +570,7 @@ export function AppContent() {
           />
         )}
 
-        {activeTab === 'result' && (
+        {activeTab === 'result' && currentDiagnosis && (
           <ScanResult
             language={language}
             disease={currentDiagnosis}
@@ -596,6 +599,7 @@ export function AppContent() {
             error={alertsError}
             onNavigateToScan={() => handleNavigateWithAuth('scan')}
             onNavigateToMap={() => handleNavigateWithAuth('map')}
+            onNavigateToPriceEstimator={() => navigateToTab('price-insights')}
             sunlightMode={sunlightMode}
           />
         )}
@@ -604,7 +608,24 @@ export function AppContent() {
           <ReportScreen
             language={language}
             farmer={farmer}
-            initialDisease={currentDiagnosis}
+            initialDisease={currentDiagnosis ? {
+              id: 'ai-scan',
+              name: currentDiagnosis.disease,
+              nameHindi: currentDiagnosis.disease,
+              crop: currentDiagnosis.crop,
+              cropHindi: currentDiagnosis.crop,
+              confidence: currentDiagnosis.confidence,
+              severity: 'High',
+              symptoms: currentDiagnosis.symptoms,
+              symptomsHindi: currentDiagnosis.symptoms,
+              organicAction: currentDiagnosis.treatment,
+              organicActionHindi: currentDiagnosis.treatment,
+              chemicalAction: currentDiagnosis.treatment,
+              chemicalActionHindi: currentDiagnosis.treatment,
+              prevention: currentDiagnosis.prevention,
+              preventionHindi: currentDiagnosis.prevention,
+              sampleImage: scannedImage
+            } : null}
             onReportSubmitted={handleReportSubmitted}
             onBack={() => handleNavigateWithAuth('result')}
             sunlightMode={sunlightMode}
@@ -662,6 +683,13 @@ export function AppContent() {
       {/* Global Authentication Modal */}
       <AuthModal language={language} />
 
+      {/* Global Chatbot */}
+      <KrishiBot
+        language={language}
+        farmerDistrict={farmer.district}
+        farmerState={farmer.state}
+        onNavigate={navigateToTab}
+      />
     </MobileFrameWrapper>
   );
 }

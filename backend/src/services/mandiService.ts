@@ -887,29 +887,45 @@ export const mandiService = {
 
     if (apiUrl && apiKey) {
       try {
-        let fetchUrl = `${apiUrl}?api-key=${apiKey}&format=json&limit=200`;
-        if (selectedState) fetchUrl += `&filters[state.keyword]=${encodeURIComponent(selectedState)}`;
-        if (selectedDistrict) fetchUrl += `&filters[district]=${encodeURIComponent(selectedDistrict)}`;
-        if (selectedCommodity) fetchUrl += `&filters[commodity]=${encodeURIComponent(selectedCommodity)}`;
+        // Build URL — data.gov.in Agmarknet uses 'filters[state.keyword]' format
+        const params = new URLSearchParams({
+          'api-key': apiKey,
+          format: 'json',
+          limit: '200',
+        });
+        if (selectedState) {
+          params.append('filters[state.keyword]', selectedState);
+          params.append('filters[state]', selectedState); // some endpoints prefer this
+        }
+        if (selectedDistrict) params.append('filters[district]', selectedDistrict);
+        if (selectedCommodity) params.append('filters[commodity]', selectedCommodity);
+
+        const fetchUrl = `${apiUrl}?${params.toString()}`;
+
+        // 8-second timeout so slow API doesn't hang the chatbot
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         const response = await fetch(fetchUrl, {
+          signal: controller.signal,
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) NovaKrishiAI/1.0',
-            'Accept': 'application/json'
-          }
+            'Accept': 'application/json',
+          },
         });
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const apiJson: any = await response.json();
           if (apiJson && Array.isArray(apiJson.records) && apiJson.records.length > 0) {
             rawRecords = apiJson.records.map((r: any, idx: number) => {
-              const commodity = r.commodity || r.crop || 'Crop';
-              const state = r.state || selectedState || 'India';
-              const district = r.district || selectedDistrict || '';
-              const mandi = r.market || r.mandi || `${district} Mandi`;
+              const commodity  = r.commodity  || r.crop   || 'Crop';
+              const state      = r.state      || selectedState    || 'India';
+              const district   = r.district   || selectedDistrict || '';
+              const mandi      = r.market     || r.mandi  || `${district} Mandi`;
               const modalPrice = parseFloat(r.modal_price || r.price || '0');
-              const minPrice = parseFloat(r.min_price || modalPrice);
-              const maxPrice = parseFloat(r.max_price || modalPrice);
+              const minPrice   = parseFloat(r.min_price   || String(modalPrice));
+              const maxPrice   = parseFloat(r.max_price   || String(modalPrice));
               const arrivalDate = r.arrival_date || new Date().toLocaleDateString('en-IN');
 
               return {
@@ -920,33 +936,34 @@ export const mandiService = {
                 price: modalPrice,
                 unit: r.unit || 'Quintal',
                 unitHindi: 'क्विंटल',
-                mandi: mandi,
-                mandiHindi: mandi,
-                district: district,
-                districtHindi: district,
-                state: state,
-                variety: r.variety || 'Common',
+                mandi, mandiHindi: mandi,
+                district, districtHindi: district,
+                state, variety: r.variety || 'Common',
                 grade: r.grade || 'FAQ',
-                minPrice: minPrice,
-                maxPrice: maxPrice,
-                modalPrice: modalPrice,
-                arrivalDate: arrivalDate,
+                minPrice, maxPrice, modalPrice,
+                arrivalDate,
                 isRealtimeApi: true,
                 priceChange: parseFloat((Math.random() * 4 - 2).toFixed(1)),
                 lastUpdated: `Latest Arrival: ${arrivalDate}`,
-                trend7d: [modalPrice * 0.95, modalPrice * 0.97, modalPrice * 0.98, modalPrice * 0.99, modalPrice, modalPrice * 1.01, modalPrice],
-                trend30d: [modalPrice * 0.9, modalPrice * 0.93, modalPrice * 0.95, modalPrice * 0.97, modalPrice, modalPrice * 1.02, modalPrice],
-                image: getCropImage(commodity)
+                trend7d:  [modalPrice*0.95, modalPrice*0.97, modalPrice*0.98, modalPrice*0.99, modalPrice, modalPrice*1.01, modalPrice],
+                trend30d: [modalPrice*0.90, modalPrice*0.93, modalPrice*0.95, modalPrice*0.97, modalPrice, modalPrice*1.02, modalPrice],
+                image: getCropImage(commodity),
               };
             });
           }
+        } else {
+          console.warn(`[MandiService] API returned ${response.status} for query: ${selectedState}/${selectedDistrict}`);
         }
-      } catch (err) {
-      
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          console.warn('[MandiService] API request timed out — using local data.');
+        } else {
+          console.error('[MandiService] API fetch error:', err?.message ?? err);
+        }
       }
     }
 
-    
+    // If API returned nothing, fall back to comprehensive local DB
     if (rawRecords.length === 0) {
       rawRecords = [...COMPREHENSIVE_MANDI_DATABASE, ...INITIAL_MARKET_RATES];
     }
