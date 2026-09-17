@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import type { 
   TabType, Language, FarmerProfile, WeatherData, OutbreakCluster, 
-  OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel, AiScanResult
+  OutbreakReport, CommunityActivity, DiseaseInfo, RiskLevel, MarketRate
 } from './types';
+import type { AiScanResult } from './scanTypes';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { 
   INITIAL_FARMER, INITIAL_WEATHER, INITIAL_CLUSTERS, 
   INITIAL_REPORTS, COMMUNITY_ACTIVITIES 

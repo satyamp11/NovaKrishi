@@ -1,4 +1,4 @@
-import type { AiScanResult } from './types';
+import type { AiScanResult } from './scanTypes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  HARDCODED DEMO RESULTS — 100% reliable, no API call needed

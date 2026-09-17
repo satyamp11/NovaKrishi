@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   Camera, Upload, Sparkles, RefreshCw, ArrowLeft, ArrowRight, ShieldCheck, Zap
 } from 'lucide-react';
-import type { Language, AiScanResult } from '../types';
+import type { Language } from '../types';
+import type { AiScanResult } from '../scanTypes';
 import { translations } from '../translations';
 import { CROP_IMAGES } from '../mockData';
 import { MOCK_SCAN_RESULTS, GENERIC_FALLBACK_RESULT } from '../mockScanResults';

@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   CheckCircle2, ArrowLeft, Radio, Sprout, AlertTriangle, ShieldCheck
 } from 'lucide-react';
-import type { Language, AiScanResult } from '../types';
+import type { Language } from '../types';
+import type { AiScanResult } from '../scanTypes';
 import { translations } from '../translations';
 import { AudioNarrationPlayer } from '../components/AudioNarrationPlayer';
 
