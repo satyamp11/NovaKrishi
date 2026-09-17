@@ -11,8 +11,12 @@ export const connectDB = async (): Promise<boolean> => {
 
   try {
     const conn = await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 5000 // 5 second timeout so server start is not blocked indefinitely
+      serverSelectionTimeoutMS: 30000, // 30s — allows Atlas free tier to wake up
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
     });
+    // Also set Mongoose's global buffer timeout so queries wait longer during wake-up
+    mongoose.set('bufferTimeoutMS', 30000);
     console.log(`🍃 MongoDB Connected successfully: ${conn.connection.host}/${conn.connection.name}`);
     return true;
   } catch (error: any) {
