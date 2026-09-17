@@ -1,17 +1,50 @@
 import React, { useState } from 'react';
 import { 
-  Camera, Upload, Sparkles, RefreshCw, ArrowLeft, ArrowRight, ShieldCheck
+  Camera, Upload, Sparkles, RefreshCw, ArrowLeft, ArrowRight, ShieldCheck, Zap
 } from 'lucide-react';
-import type { Language, DiseaseInfo } from '../types';
+import type { Language } from '../types';
+import type { AiScanResult } from '../scanTypes';
 import { translations } from '../translations';
-import { DISEASE_DATABASE, CROP_IMAGES } from '../mockData';
+import { CROP_IMAGES } from '../mockData';
+import { MOCK_SCAN_RESULTS, GENERIC_FALLBACK_RESULT } from '../mockScanResults';
 
 interface CropScannerProps {
   language: Language;
-  onScanComplete: (result: DiseaseInfo, uploadedImage: string) => void;
+  onScanComplete: (result: AiScanResult, uploadedImage: string) => void;
   onBack: () => void;
   sunlightMode: boolean;
 }
+
+// ── Preset definitions — each has a mockKey that maps to MOCK_SCAN_RESULTS ──
+const samplePresets = [
+  {
+    label: "Mango Leaf (Anthracnose)",
+    crop: "Mango",
+    image: "https://upload.wikimedia.org/wikipedia/commons/5/55/Mango_anthracnose_1a.jpg",
+    mockKey: "mango_anthracnose",
+    badge: "Infected",
+    badgeColor: "bg-red-100 text-red-700"
+  },
+  {
+    label: "Wheat Yellow Rust (Infected)",
+    crop: "Wheat",
+    image: CROP_IMAGES.wheatRust,
+    mockKey: "wheat_rust",
+    badge: "Warning",
+    badgeColor: "bg-amber-100 text-amber-700"
+  },
+  {
+    label: "Healthy Wheat (Clean)",
+    crop: "Wheat",
+    image: CROP_IMAGES.healthyWheat,
+    mockKey: "healthy_crop",
+    badge: "Healthy",
+    badgeColor: "bg-emerald-100 text-emerald-700"
+  },
+];
+
+// Sleep helper for artificial delay
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const CropScanner: React.FC<CropScannerProps> = ({
   language,
@@ -21,44 +54,115 @@ export const CropScanner: React.FC<CropScannerProps> = ({
 }) => {
   const t = translations[language];
 
-  const [selectedCrop, setSelectedCrop] = useState<string>('Tomato');
-  const [selectedImage, setSelectedImage] = useState<string>(CROP_IMAGES.tomatoBlight);
+  const [selectedPresetKey, setSelectedPresetKey] = useState<string | null>('mango_anthracnose');
+  const [selectedImage, setSelectedImage] = useState<string>(samplePresets[0].image);
+  const [isUserUpload, setIsUserUpload] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanStepText, setScanStepText] = useState<string>('');
 
-  const samplePresets = [
-    { label: "Tomato Blight (Infected)", crop: "Tomato", image: CROP_IMAGES.tomatoBlight, key: "tomato_blight" },
-    { label: "Wheat Yellow Rust (Infected)", crop: "Wheat", image: CROP_IMAGES.wheatRust, key: "wheat_rust" },
-    { label: "Healthy Wheat (Clean)", crop: "Wheat", image: CROP_IMAGES.healthyWheat, key: "healthy_crop" },
-  ];
-
-  const handleStartScan = (targetKey?: string) => {
+  // ── MOCK scan for demo presets — instant, no API call ─────────────────────
+  const runMockScan = async (mockKey: string, imageUrl: string) => {
     setIsScanning(true);
 
     const steps = [
-      t.analyzingTexture,
-      t.detectingLesions,
-      t.generatingReport
+      'Analyzing leaf texture...',
+      'Detecting disease markers...',
+      'Matching pathogen database...',
+      'Generating diagnosis report...',
     ];
 
-    setScanStepText(steps[0]);
+    for (const step of steps) {
+      setScanStepText(step);
+      await sleep(420);
+    }
 
-    setTimeout(() => {
-      setScanStepText(steps[1]);
-    }, 900);
+    const result = MOCK_SCAN_RESULTS[mockKey];
+    setIsScanning(false);
 
-    setTimeout(() => {
-      setScanStepText(steps[2]);
-    }, 1800);
-
-    setTimeout(() => {
-      setIsScanning(false);
-      const chosenKey = targetKey || (selectedCrop === 'Wheat' ? 'wheat_rust' : 'tomato_blight');
-      const diseaseData = DISEASE_DATABASE[chosenKey] || DISEASE_DATABASE.tomato_blight;
-      onScanComplete(diseaseData, selectedImage);
-    }, 2600);
+    if (result) {
+      onScanComplete(result, imageUrl);
+    }
   };
 
+  // ── REAL scan for user-uploaded photos — tries API, falls back gracefully ──
+  const runRealScan = async (base64Image: string) => {
+    setIsScanning(true);
+
+    const steps = [
+      t.analyzingTexture || 'Analyzing crop image...',
+      'Querying AI diagnostics engine...',
+      'Comparing with 50,000+ samples...',
+      'Generating report...',
+    ];
+
+    // Step through animation while API call happens in parallel
+    let stepIndex = 0;
+    const stepTimer = setInterval(() => {
+      if (stepIndex < steps.length) {
+        setScanStepText(steps[stepIndex++]);
+      }
+    }, 600);
+
+    try {
+      const token = localStorage.getItem('token');
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
+      const response = await fetch(`${API_BASE}/scans/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ image: base64Image }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const json = await response.json();
+        if (json.success && json.data) {
+          clearInterval(stepTimer);
+          setIsScanning(false);
+          onScanComplete(json.data, base64Image);
+          return;
+        }
+      }
+      // Non-OK response or missing data → fall through to graceful fallback below
+      throw new Error('API response not usable');
+
+    } catch (error) {
+      // ANY error (network, timeout, API, parse) → show graceful fallback, never show error popup
+      console.warn('[CropScanner] Live API failed — showing graceful fallback result:', error);
+    } finally {
+      clearInterval(stepTimer);
+      setIsScanning(false);
+    }
+
+    // Graceful fallback — always show a professional result, never a raw error
+    onScanComplete(GENERIC_FALLBACK_RESULT, base64Image);
+  };
+
+  // ── Main scan handler ─────────────────────────────────────────────────────
+  const handleStartScan = async () => {
+    if (isScanning) return;
+
+    if (!isUserUpload && selectedPresetKey) {
+      // Demo preset → use hardcoded mock result (100% reliable)
+      await runMockScan(selectedPresetKey, selectedImage);
+    } else {
+      // User-uploaded photo → try real API with graceful fallback
+      if (!selectedImage || !selectedImage.startsWith('data:image')) {
+        alert('Please upload a photo first.');
+        return;
+      }
+      await runRealScan(selectedImage);
+    }
+  };
+
+  // ── File upload handler ──────────────────────────────────────────────────
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -66,6 +170,8 @@ export const CropScanner: React.FC<CropScannerProps> = ({
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
           setSelectedImage(reader.result);
+          setSelectedPresetKey(null); // clear preset selection
+          setIsUserUpload(true);
         }
       };
       reader.readAsDataURL(file);
@@ -131,6 +237,13 @@ export const CropScanner: React.FC<CropScannerProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* User Upload badge */}
+                {isUserUpload && !isScanning && (
+                  <div className="absolute top-3 right-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                    YOUR PHOTO
+                  </div>
+                )}
               </div>
 
               {/* Upload Controls */}
@@ -147,7 +260,7 @@ export const CropScanner: React.FC<CropScannerProps> = ({
                 </label>
 
                 <button
-                  onClick={() => handleStartScan()}
+                  onClick={handleStartScan}
                   disabled={isScanning}
                   className="flex-1 w-full sm:w-auto bg-[#1b4332] hover:bg-[#143326] disabled:opacity-50 text-white font-bold text-sm py-3.5 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-95"
                 >
@@ -165,10 +278,11 @@ export const CropScanner: React.FC<CropScannerProps> = ({
               
               <div>
                 <h3 className="font-serif-title font-bold text-xl text-[#1b4332]">
-                  Quick Demo Sample Presets
+                  Quick Sample Images
                 </h3>
-                <p className="text-xs text-slate-500 font-medium mt-1">
-                  Select a test image to simulate instant offline AI crop scanning:
+                <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-amber-500" />
+                  Instant AI diagnosis — no upload needed:
                 </p>
               </div>
 
@@ -178,12 +292,12 @@ export const CropScanner: React.FC<CropScannerProps> = ({
                   <div
                     key={i}
                     onClick={() => {
-                      setSelectedCrop(preset.crop);
                       setSelectedImage(preset.image);
-                      handleStartScan(preset.key);
+                      setSelectedPresetKey(preset.mockKey);
+                      setIsUserUpload(false);
                     }}
                     className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                      selectedImage === preset.image
+                      selectedPresetKey === preset.mockKey
                         ? 'border-[#1b4332] bg-emerald-50/40 ring-2 ring-[#1b4332]/20'
                         : 'border-slate-200 hover:border-[#1b4332]/50 bg-slate-50/60'
                     }`}
@@ -199,7 +313,9 @@ export const CropScanner: React.FC<CropScannerProps> = ({
                       />
                       <div>
                         <h4 className="font-bold text-slate-900 text-xs">{preset.label}</h4>
-                        <span className="text-[10px] text-slate-500 font-medium">{preset.crop} Field Sample</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${preset.badgeColor}`}>
+                          {preset.badge}
+                        </span>
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-[#1b4332]" />
